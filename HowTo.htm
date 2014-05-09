@@ -1,0 +1,336 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+	<head>
+		<title>1)</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+		<meta name="ProgId" content="Word.Document">
+		<meta name="Generator" content="Microsoft Word 11">
+		<meta name="Originator" content="Microsoft Word 11">
+		<link rel="File-List" href="HowTo_files/filelist.xml"> <!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author> </o:Author>
+  <o:LastAuthor>Terence Wilson</o:LastAuthor>
+  <o:Revision>13</o:Revision>
+  <o:TotalTime>246</o:TotalTime>
+  <o:Created>2003-03-04T22:57:00Z</o:Created>
+  <o:LastSaved>2004-02-24T18:10:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>468</o:Words>
+  <o:Characters>2670</o:Characters>
+  <o:Company>Gatan, Inc.</o:Company>
+  <o:Lines>22</o:Lines>
+  <o:Paragraphs>6</o:Paragraphs>
+  <o:CharactersWithSpaces>3132</o:CharactersWithSpaces>
+  <o:Version>11.5606</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]-->  <!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>172</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->  <!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+			<style> @font-face { font-family: Verdana; } @page Section1 {size: 8.5in 11.0in; margin: 1.0in 1.25in 1.0in 1.25in; mso-header-margin: .5in; mso-footer-margin: .5in; mso-paper-source: 0; } P.MsoNormal { FONT-SIZE: 12pt; MARGIN: 0in 0in 0pt; FONT-FAMILY: "Times New Roman"; mso-style-parent: ""; mso-pagination: widow-orphan; mso-fareast-font-family: "Times New Roman" } LI.MsoNormal { FONT-SIZE: 12pt; MARGIN: 0in 0in 0pt; FONT-FAMILY: "Times New Roman"; mso-style-parent: ""; mso-pagination: widow-orphan; mso-fareast-font-family: "Times New Roman" } DIV.MsoNormal { FONT-SIZE: 12pt; MARGIN: 0in 0in 0pt; FONT-FAMILY: "Times New Roman"; mso-style-parent: ""; mso-pagination: widow-orphan; mso-fareast-font-family: "Times New Roman" } H1 { FONT-SIZE: 16pt; MARGIN: 12pt 0in 3pt; FONT-FAMILY: Arial; mso-pagination: widow-orphan; mso-style-next: Normal; mso-outline-level: 1; mso-font-kerning: 16.0pt } A:link { COLOR: blue; TEXT-DECORATION: underline; text-underline: single } SPAN.MsoHyperlink { COLOR: blue; TEXT-DECORATION: underline; text-underline: single } A:visited { COLOR: purple; TEXT-DECORATION: underline; text-underline: single } SPAN.MsoHyperlinkFollowed { COLOR: purple; TEXT-DECORATION: underline; text-underline: single } SPAN.SpellE { mso-style-name: ""; mso-spl-e: yes } SPAN.GramE { mso-style-name: ""; mso-gram-e: yes } DIV.Section1 { page: Section1 } OL { MARGIN-BOTTOM: 0in } UL { MARGIN-BOTTOM: 0in } </style>
+		<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+	</head>
+	<body lang="EN-US" link="blue" vlink="purple" style='tab-interval:.5in'>
+		<h1 style='MARGIN-RIGHT:66pt' class="Section1"><span style='mso-spacerun:yes'>&nbsp;</span>Creating 
+			Plug-ins with
+			<span class="SpellE">CDialogs</span>
+			and/or
+			<span class="SpellE">CPropertySheets</span></h1>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.25in'><span style='FONT-SIZE:10pt;
+FONT-FAMILY:Verdana'><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.25in'><span style='FONT-SIZE:10pt;
+FONT-FAMILY:Verdana'>Create DLL with MFC support. Replicate code and build
+settings from the <span class="SpellE">TemplateMFCDialogPlugIn</span> project.<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt'><span style='FONT-SIZE:10pt;
+FONT-FAMILY:Verdana'><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.5in; TEXT-INDENT:-0.25in; mso-list:l2 level1 lfo2; tab-stops:list .5in'><![if 
+			!supportLists]><span style='FONT-SIZE:10pt;
+FONT-FAMILY:Verdana;
+mso-fareast-font-family:Verdana;
+mso-bidi-font-family:Verdana'><span style='mso-list:Ignore'>1)<span style="FONT:7pt 'Times New Roman'">&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>
+			</span><![endif]><span style='FONT-SIZE:10pt;FONT-FAMILY:Verdana'>Add
+one or more <span class="SpellE">Gatan:<span class="GramE">:PlugIn</span>::CPlugInDialogBase/CPropertySheet</span>
+derived classes.<span style='mso-spacerun:yes'>&nbsp; </span>For <span class="SpellE">CDialogs</span>
+override <span class="SpellE">CDialog::Create</span> as follows:<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt'><span style='FONT-SIZE:10pt;
+FONT-FAMILY:Verdana'><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:'Courier New'">BOOL</span><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">
+<span class="SpellE"><span style='COLOR:black'>CMyDialog</span>::<span class="GramE">
+						<span style='COLOR:black'>Create</span>
+					</span></span><span class="GramE">(</span><span style='COLOR:black'>UINT</span> <span class="SpellE">
+					<span style='COLOR:black'>templateID</span>
+				</span>, <span class="SpellE">
+					<span style='COLOR:black'>CWnd</span>
+				</span>* <span class="SpellE">
+					<span style='COLOR:black'>pParentWnd</span>
+				</span>)<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">{<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>// IDD is the dialog template resource ID<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="GramE">
+					<span style='COLOR:blue'>return</span>
+				</span>
+<span class="SpellE">Gatan::PlugIn::<span style='COLOR:black'>CPlugInDialogBase</span>::<span style='COLOR:black'>Create</span></span>(<span style='COLOR:black'>IDD</span>, <span class="SpellE">
+					<span style='COLOR:black'>pParentWnd</span>
+				</span>);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in'><span style="FONT-SIZE:10pt;
+FONT-FAMILY:'Courier New'">}<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in'><span style="FONT-SIZE:10pt;
+FONT-FAMILY:'Courier New'"><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>For
+<span class="SpellE">CPropertySheets</span> provide a default constructor:<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span class="SpellE"><span class="GramE"><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:'Courier New'">CDMPropertySheet</span>
+				</span>
+			</span><span class="GramE"><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">(</span>
+			</span><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">):<span class="SpellE"><span style='COLOR:black'>CPropertySheet</span>
+				</span>("")<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">{<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="SpellE">
+					<span class="GramE">
+						<span style='COLOR:black'>AddPage</span>
+					</span>
+				</span><span class="GramE">(</span>…);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="SpellE">
+					<span class="GramE">
+						<span style='COLOR:black'>AddPage</span>
+					</span>
+				</span><span class="GramE">(</span>…);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 1in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">}<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.5in'><span style="FONT-SIZE:10pt;
+FONT-FAMILY:'Courier New'"><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.5in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">Make the dialog/property sheet dynamically
+creatable by adding the <span style='COLOR:black'>IMPLEMENT_<span class="GramE">DYNCREATE<span style='COLOR:windowtext'>(</span></span>…</span>) and <span style='COLOR:black'>DECLARE_DYNCREATE</span>(<span style='COLOR:black'>..</span>) macros to the implementation and header files
+respectively.<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.25in; mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">2) To make the dialog resemble other DM
+floating windows edit the default dialog properties in the resource window:<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+				<o:p></o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>3D
+Look<span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>false<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Style<span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>child<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>System
+Menu<span style='mso-tab-count:1'></span>false<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>System
+Modal<span style='mso-tab-count:1'></span>false<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Title
+Bar<span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>false<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Visible<span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>true<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.25in'><span style="FONT-SIZE:10pt;
+FONT-FAMILY:'Courier New'"><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN:0in 66pt 0pt 0.5in; TEXT-INDENT:-0.25in; mso-list:l0 level1 lfo4; tab-stops:list .5in'><![if 
+			!supportLists]><span style='FONT-SIZE:10pt;
+FONT-FAMILY:Verdana;
+mso-fareast-font-family:Verdana;
+mso-bidi-font-family:Verdana'><span style='mso-list:Ignore'>3)<span style="FONT:7pt 'Times New Roman'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>
+			</span><![endif]><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">Because this is an extension DLL, there should be no <span class="SpellE">CWinApp</span> derived class in the plugin. 
+There must be exactly&nbsp;global object of a class derived <span class="GramE">from<span class="SpellE">
+							<span style="COLOR:
+black; FONT-FAMILY:
+'Courier New'">PlugInMain</span>&nbsp;and
+						</span></span></span><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:'Courier New'"> <span class="SpellE">MFCFloatingDialogPlugIn</span>. </span><span style="FONT-SIZE:
+10pt;COLOR:
+black;FONT-FAMILY:
+Verdana;mso-bidi-font-family:
+'Courier New'">The
+dialog/property sheet is registered and unregistered by the overridden </span><span class="SpellE"><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:'Courier New'">MyDialogPlugIn:</span>
+				<span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">:Start</span>
+			</span><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"> and </span><span class="SpellE"><span style="FONT-SIZE:10pt;
+COLOR:black;
+FONT-FAMILY:'Courier New'">MyDialogPlugIn</span>
+				<span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">::End</span>
+			</span><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"> methods. For example:</span><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:'Courier New'"><o:p></o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN-RIGHT:66pt'><span style="FONT-SIZE:10pt;
+COLOR:black;
+FONT-FAMILY:'Courier New'"><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;COLOR:blue;FONT-FAMILY:'Courier New'">class</span><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">
+<span class="SpellE"><span style='COLOR:black'>MyDialogPlugIn</span>
+				</span> : <span style='COLOR:blue'>public</span> <span class="SpellE"><span style='COLOR:black'>Gatan</span>::<span style='COLOR:black'>PlugIn</span>::<span style='COLOR:black'>PlugInMain</span></span>,
+<span style='COLOR:blue'>public</span> <span class="SpellE"><span style='COLOR:black'>Gatan</span>::<span style='COLOR:black'>PlugIn</span>::<span style='COLOR:black'>MFCPlugInUtility</span></span><span style='COLOR:black'>
+					<o:p></o:p>
+				</span></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">{<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span class="GramE"><span style="FONT-SIZE:10pt;
+COLOR:blue;
+FONT-FAMILY:'Courier New'">private</span>
+			</span><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">:<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='COLOR:black'>uint32</span> <span style='COLOR:black'>fMFCPaletteHandle1</span>;<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='COLOR:black'>uint32</span> <span style='COLOR:black'>fMFCPaletteHandle2</span>;<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span class="GramE"><span style="FONT-SIZE:10pt;
+COLOR:blue;
+FONT-FAMILY:'Courier New'">public</span>
+			</span><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">:<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="GramE">
+					<span style='COLOR:blue'>virtual</span>
+				</span>
+<span style='COLOR:blue'>void</span> <span style='COLOR:black'>Start</span>(<span style='COLOR:blue'>void</span>)<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='COLOR:black'>fMFCPaletteHandle1</span>=<span class="SpellE">
+					<span class="GramE">
+						<span style='COLOR:black'>RegisterMFCPalette</span>
+					</span>
+				</span><span class="GramE">(</span>"Cabbage", <span class="SpellE">
+					<span style='COLOR:black'>GetPlugInOSHandle</span>
+				</span>(), <span style='COLOR:black'>RUNTIME_CLASS</span>(<span class="SpellE">
+					<span style='COLOR:black'>CDMDialog</span>
+				</span>));<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='COLOR:black'>fMFCPaletteHandle2</span>=<span class="SpellE">
+					<span class="GramE">
+						<span style='COLOR:black'>RegisterMFCPalette</span>
+					</span>
+				</span><span class="GramE">(</span>"Rhubarb", <span class="SpellE">
+					<span style='COLOR:black'>GetPlugInOSHandle</span>
+				</span>(), <span style='COLOR:black'>RUNTIME_CLASS</span>(<span class="SpellE">
+					<span style='COLOR:black'>CDMPropertySheet</span>
+				</span>));<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="GramE">
+					<span style='COLOR:blue'>virtual</span>
+				</span>
+<span style='COLOR:blue'>void</span> <span style='COLOR:black'>End</span>(<span style='COLOR:blue'>void</span>)<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="SpellE">
+					<span class="GramE">
+						<span style='COLOR:black'>UnregisterMFCPalette</span>
+					</span>
+				</span><span class="GramE">(</span><span style='COLOR:black'>fMFCPaletteHandle1</span>);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="SpellE">
+					<span class="GramE">
+						<span style='COLOR:black'>UnregisterMFCPalette</span>
+					</span>
+				</span><span class="GramE">(</span><span style='COLOR:black'>fMFCPaletteHandle2</span>);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">};<o:p></o:p></span></p>
+		<span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">
+			<P class="MsoNormal" style="MARGIN-LEFT: 0.5in; TEXT-INDENT: -0.25in; mso-layout-grid-align: none">&nbsp;</P>
+			<P class="MsoNormal" style="MARGIN: 0in 66pt 0pt 0.5in; TEXT-INDENT: -0.25in; mso-list: l0 level1 lfo4; tab-stops: list .5in"><SPAN style="FONT-SIZE: 10pt; FONT-FAMILY: Verdana; mso-fareast-font-family: Verdana; mso-bidi-font-family: Verdana"><SPAN style="mso-list: Ignore">4)<SPAN style="FONT: 7pt 'Times New Roman'">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></SPAN>
+				</SPAN><SPAN style="FONT-SIZE: 10pt; FONT-FAMILY: Verdana; mso-bidi-font-family: 'Courier New'">Exactly one source file in the project must include <FONT face="Courier New">DMPlugInMain.h</FONT>. 
+After that include statement, it must contain the line </SPAN></P>
+			<P class="MsoNormal" style="MARGIN: 0in 66pt 0pt 0.5in; TEXT-INDENT: -0.25in; mso-list: l0 level1 lfo4; tab-stops: list .5in"><SPAN style="FONT-SIZE: 10pt; FONT-FAMILY: Verdana; mso-bidi-font-family: 'Courier New'"></SPAN>&nbsp;</P>
+			<PRE class="MsoNormal" style="MARGIN: 0in 66pt 0pt 0.5in; TEXT-INDENT: -0.25in; mso-list: l0 level1 lfo4; tab-stops: list .5in"><SPAN style="FONT-SIZE: 10pt; FONT-FAMILY: Verdana; mso-bidi-font-family: 'Courier New'">         <FONT color=#3300ff>extern</FONT> AFX_EXTENSION_MODULE gPlugInExtensionModule = { NULL, NULL }; </SPAN></PRE>
+			<P class="MsoNormal" style="MARGIN: 0in 66pt 0pt 0.5in; TEXT-INDENT: -0.25in; mso-list: l0 level1 lfo4; tab-stops: list .5in"><SPAN style="FONT-SIZE: 10pt; FONT-FAMILY: Verdana; mso-bidi-font-family: 'Courier New'"></SPAN>&nbsp;</P>
+			<P class="MsoNormal" style="MARGIN-LEFT: 0.5in; TEXT-INDENT: -0.25in; mso-layout-grid-align: none">
+		</span><span style="FONT-SIZE:10pt;
+FONT-FAMILY:'Courier New'"><FONT face="Times New Roman" size="3">5</FONT>) </span><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">The size of a <span class="SpellE">CPropertySheet</span>
+is determined by the maximum size of its child <span class="SpellE">CPropertyPages</span>,
+however, by default it is never sized smaller than the width of the default
+buttons (apply, help, ok, cancel) whether they are included or not. In the case
+of narrow property pages you may want to size the parent smaller than the
+default, to do this override<span style='mso-spacerun:yes'>&nbsp; </span></span><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><o:p></o:p>
+		</span></P>
+		<p class="MsoNormal" style='mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:
+1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style='COLOR:black'>BOOL</span> <span class="SpellE"><span style='COLOR:black'>CPropertySheet</span>::<span class="GramE">
+						<span style='COLOR:black'>OnInitDialog</span>
+					</span></span><span class="GramE">(</span>)
+</span><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">as in the example </span><span class="SpellE"><span style='FONT-SIZE:10pt;FONT-FAMILY:Verdana'>TemplateMFCDialogPlugIn</span>
+			</span><span style='FONT-SIZE:10pt;FONT-FAMILY:Verdana'> project.<o:p></o:p></span></p>
+		<p class="MsoNormal" style='mso-layout-grid-align:none'><span style='FONT-SIZE:10pt;FONT-FAMILY:Verdana'><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:0.5in;TEXT-INDENT:-0.25in;mso-list:l1 level1 lfo6;tab-stops:list .5in;mso-layout-grid-align:none'><![if 
+			!supportLists]><span style='FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-fareast-font-family:Verdana;mso-bidi-font-family:Verdana'><span style='mso-list:Ignore'>6)<span style="FONT:7pt 'Times New Roman'">&nbsp;&nbsp;&nbsp;&nbsp; </span></span>
+			</span><![endif]><span style='FONT-SIZE:10pt;FONT-FAMILY:Verdana'>To access plug-in resources use
+the </span><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:'Courier New'">
+GTN_AFX_MANAGE_STATE </span><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">macro to ensure resources are loaded from the plug-in, not 
+DM. If a module instance is needed, use <FONT face="Courier New">AfxGetResourceHandle</FONT>, not&nbsp;<FONT face="Courier New">AfxGetInstanceHandle</FONT>. For example:</span><span style="FONT-SIZE:10pt;COLOR:green;FONT-FAMILY:'Courier New'"><o:p></o:p>
+			</span></p>
+		<p class="MsoNormal" style='mso-layout-grid-align:none'><span style='FONT-SIZE:10pt;FONT-FAMILY:Verdana'><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span class="GramE"><span style="FONT-SIZE:10pt;
+COLOR:blue;
+FONT-FAMILY:'Courier New'">void</span>
+			</span><span style="FONT-SIZE:
+10pt;FONT-FAMILY:
+'Courier New'"> <span style='COLOR:black'>CDMPropertyPage1</span>::<span style='COLOR:black'>OnBnClickedHelloButton</span>()<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">{<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GTN_ </span><span style='COLOR:black'>AFX_MANAGE_<span class="GramE">STATE<span style='COLOR:windowtext'>(</span></span></span>);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="SpellE">
+					<span style='COLOR:
+black'>CString</span>
+				</span> <span class="SpellE">
+					<span style='COLOR:black'>myString</span>
+				</span>;<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="SpellE">
+					<span class="GramE"><span style='COLOR:black'>myString</span>.<span style='COLOR:black'>LoadString</span></span>
+				</span><span class="GramE">(</span><span style='COLOR:black'>IDS_HELLO_STRING</span>);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="GramE"><span style='COLOR:black'>TRACE</span>(</span>"%s\r\n",
+<span class="SpellE">
+					<span style='COLOR:black'>myString</span>
+				</span>);<o:p></o:p></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:1in;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;FONT-FAMILY:'Courier New'">}<span style='COLOR:green'><o:p></o:p>
+				</span></span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:0.25in;TEXT-INDENT:-0.25in;tab-stops:right 27.0pt;mso-layout-grid-align:none'><span style="FONT-SIZE:10pt;
+FONT-FAMILY:'Courier New'"><o:p>&nbsp;</o:p>
+			</span></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:0.25in;TEXT-INDENT:-0.25in;tab-stops:right 27.0pt;mso-layout-grid-align:none'><span style="FONT-SIZE:14pt;
+FONT-FAMILY:'Courier New'"><span style='mso-tab-count:1'>&nbsp; </span>
+			</span><b style='mso-bidi-font-weight:normal'><span style="FONT-SIZE:14pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">Limitation<o:p></o:p></span></b></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:0.25in;TEXT-INDENT:-0.25in;tab-stops:right 27.0pt;mso-layout-grid-align:none'><b style='mso-bidi-font-weight:
+normal'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><o:p>&nbsp;</o:p>
+				</span></b></p>
+		<p class="MsoNormal" style='MARGIN-LEFT:0.5in;TEXT-INDENT:-0.5in;tab-stops:right 27.0pt;mso-layout-grid-align:none'><b style='mso-bidi-font-weight:
+normal'><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'"><span style='mso-tab-count:2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>
+				</span></b><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">When
+using activeX controls in <span class="SpellE">CPropertyPages</span> which are
+not initially selected, MFC attempts to access resources from the wrong module
+when the page is selected. The theoretic workaround is to override the
+initialization code (</span><span class="SpellE"><span style="FONT-SIZE:10pt;
+COLOR:black;
+FONT-FAMILY:'Courier New'">HandleInitDialog</span>
+			</span><span style="FONT-SIZE:10pt;FONT-FAMILY:Verdana;mso-bidi-font-family:'Courier New'">)
+for the page and insert the </span><span style="FONT-SIZE:10pt;COLOR:black;FONT-FAMILY:'Courier New'">GTN_AFX_MANAGE_STATE </span><span style="FONT-SIZE:10pt;
+COLOR:black;
+FONT-FAMILY:Verdana;
+mso-bidi-font-family:'Courier New'">macro,
+however, this results in adverse side effects which I need to investigate
+further (the same issue has been documented previously- see <a href="http://groups.google.com/groups?q=AFX_MANAGE_STATE+HandleInitDialog&amp;hl=en&amp;lr=&amp;ie=UTF-8&amp;oe=UTF-8&amp;selm=37EA35BF.828E6258@tessa.be&amp;rnum=1">Google</a>).<o:p></o:p></span></p>
+	</body>
+</html>

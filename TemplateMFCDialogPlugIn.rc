@@ -1,0 +1,400 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\TemplateMFCDialogPlugIn.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,10,1282,0
+ PRODUCTVERSION 2,10,1282,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "TODO: <Company name>"
+            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "FileVersion", "2.10.1282.0"
+            VALUE "InternalName", "TemplateMFCDialogPlugIn.dll"
+            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "OriginalFilename", "TemplateMFCDialogPlugIn.dll"
+            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductVersion", "2.10.1282.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DMDIALOG DIALOGEX 0, 0, 122, 204
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
+FONT 7, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,0,0,116,199
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DMDIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 106
+        VERTGUIDE, 30
+        VERTGUIDE, 46
+        BOTTOMMARGIN, 199
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United Kingdom) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG1 DIALOGEX 0, 0, 109, 179
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
+FONT 7, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Reset OpenCL Device",IDC_BUTTON1,37,163,67,14
+    EDITTEXT        IDC_EDIT1,65,4,39,14,ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    RTEXT           "inf limit (1/nm) :",IDC_STATIC,3,4,59,14,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT2,65,20,39,14,ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    RTEXT           "search start (nm):",IDC_STATIC,3,20,59,14,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT3,65,36,39,14,ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    RTEXT           "search end (nm):",IDC_STATIC,3,36,59,14,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT4,65,52,39,14,ES_AUTOHSCROLL | ES_NUMBER | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    RTEXT           "search steps :",IDC_STATIC,3,52,59,14,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT5,65,68,39,14,ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    RTEXT           "Cs (um):",IDC_STATIC,3,68,59,14,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT6,65,84,39,14,ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    RTEXT           "Beta (mrad):",IDC_STATIC,3,84,59,14,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT7,65,100,39,14,ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    RTEXT           "Delta (nm):",IDC_STATIC,3,100,59,14,0,WS_EX_RIGHT
+    PUSHBUTTON      "Reconstruct",IDC_BUTTON2,67,148,37,15
+    PUSHBUTTON      "Options",IDC_OPTIONSBUTTON,1,163,36,14
+    PUSHBUTTON      "Open Series",IDC_OPTIONSBUTTON2,29,148,38,15
+    PUSHBUTTON      "Adjust",IDC_Adjust,1,148,28,15
+    PUSHBUTTON      "MTF",IDC_BUTTONMTF,4,115,50,14
+    PUSHBUTTON      "NPS",IDC_BUTTONNPS,55,115,50,14
+END
+
+IDD_DIALOG2 DIALOGEX 0, 0, 110, 178
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
+FONT 7, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_EDIT31,53,4,47,14,ES_AUTOHSCROLL
+    LTEXT           "focalstep (nm):",IDC_STATIC,6,6,45,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT32,53,18,47,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "# of images:",IDC_STATIC,11,20,39,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT38,53,32,47,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "# underfocus:",IDC_STATIC,11,34,39,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT39,53,46,47,14,ES_AUTOHSCROLL
+    LTEXT           "exposure (s):",IDC_STATIC,11,48,39,8,0,WS_EX_RIGHT
+    LTEXT           "binning:",IDC_STATIC,11,62,39,8,0,WS_EX_RIGHT
+    COMBOBOX        IDC_COMBO1,53,60,47,43,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Acquire",IDC_BUTTON4,5,146,50,14
+    GROUPBOX        "Low Dose",IDC_STATIC,9,85,96,39
+    CONTROL         "Low Dose",IDC_CHECKLOW,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,53,110,47,11
+    EDITTEXT        IDC_EDIT42,53,96,47,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "DAC shift:",IDC_STATIC,11,98,39,8,0,WS_EX_RIGHT
+    PUSHBUTTON      "Stop",IDC_BUTTON5,56,146,50,14,WS_DISABLED
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,6,161,100,14
+    CONTROL         "Voltage Mode",IDC_CHECKFOCVOL,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,57,129,47,15
+    PUSHBUTTON      "Search Mode",IDC_SEARCH,6,129,50,14,WS_DISABLED
+    EDITTEXT        IDC_EDITSETTLING,53,73,47,14,ES_AUTOHSCROLL
+    LTEXT           "settling (s):",IDC_STATIC,11,75,39,8,0,WS_EX_RIGHT
+END
+
+IDD_OPTIONSDIALOG DIALOGEX 0, 0, 209, 295
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "FTSR Options"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,101,274,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,152,274,50,14
+    CONTROL         "Determine Defocus?",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,96,109,85,10
+    CONTROL         "Align images to reconstruction?",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,66,174,115,10
+    EDITTEXT        IDC_EDIT1,129,121,53,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Trials per Image",IDC_STATIC,69,122,52,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT2,129,135,53,14,ES_AUTOHSCROLL
+    LTEXT           "Search Range %",IDC_STATIC,67,138,55,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT8,129,185,53,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Reference Image",IDC_STATIC,67,188,56,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT9,129,27,53,14,ES_AUTOHSCROLL
+    LTEXT           "Max Frequency in Alignment",IDC_STATIC,32,30,91,8,0,WS_EX_RIGHT
+    GROUPBOX        "align with reconstruction",IDC_STATIC,19,161,170,43
+    GROUPBOX        "correct defocus",IDC_STATIC,21,97,169,61
+    GROUPBOX        "general",IDC_STATIC,21,14,169,81
+    CONTROL         "Rotate and Scale Images",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,80,221,99,10
+    EDITTEXT        IDC_EDIT10,127,233,53,14,ES_AUTOHSCROLL
+    LTEXT           "Rotation deg/nm",IDC_STATIC,67,233,54,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT11,127,247,53,14,ES_AUTOHSCROLL
+    LTEXT           "Magnification/nm",IDC_STATIC,67,249,55,8,0,WS_EX_RIGHT
+    GROUPBOX        "magnification and rotation alignment",IDC_STATIC,19,209,169,61
+    EDITTEXT        IDC_EDITMAXDRIFT,129,42,53,14,ES_AUTOHSCROLL
+    LTEXT           "Max Drift in Pixels",IDC_STATIC,64,44,58,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDITSNR,129,56,53,14,ES_AUTOHSCROLL
+    LTEXT           "Noise To Signal Fraction",IDC_STATIC,44,59,77,8,0,WS_EX_RIGHT
+    CONTROL         "Use Mutual Information",IDC_CHECKMI,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_LEFT | WS_TABSTOP,87,74,95,10
+END
+
+IDD_DIALOG3 DIALOGEX 0, 0, 225, 170
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Search Mode"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Acquire Image",IDC_SEARCHACQUIRE,36,129,64,14
+    EDITTEXT        IDC_PREMOVEX,124,27,40,14,ES_AUTOHSCROLL
+    LTEXT           "Pre Acquire Movement X",IDC_STATIC,32,31,84,8
+    EDITTEXT        IDC_PREMOVEY,124,41,40,14,ES_AUTOHSCROLL
+    LTEXT           "Pre Acquire Movement Y",IDC_STATIC,32,44,84,8
+    LTEXT           "um",IDC_STATIC,168,31,28,8
+    LTEXT           "um",IDC_STATIC,168,44,28,8
+    GROUPBOX        "Movement",IDC_STATIC,25,18,172,62
+    GROUPBOX        "Focus",IDC_STATIC,26,82,172,43
+    PUSHBUTTON      "Acquire Series",IDC_SEARCHACQUIRESERIES,105,129,82,14
+    EDITTEXT        IDC_FOCUS,124,98,40,14,ES_AUTOHSCROLL
+    LTEXT           "nm",IDC_STATIC,168,101,28,8
+    CONTROL         "Set Focus",IDC_SETFOCUS,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,71,100,47,10
+    EDITTEXT        IDC_PREMOVEDELAY,124,56,40,14,ES_AUTOHSCROLL
+    LTEXT           "Pre Acquire Delay",IDC_STATIC,32,59,84,8
+    LTEXT           "s",IDC_STATIC,168,59,28,8
+END
+
+IDD_ADJUSTRECON DIALOGEX 0, 0, 267, 157
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOPMOST
+CAPTION "Adjust Reconstruction"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Abberations",IDC_STATIC,25,25,217,96
+    EDITTEXT        IDC_C1,68,38,40,14,ES_AUTOHSCROLL
+    LTEXT           "C1",IDC_STATIC,44,41,10,8
+    EDITTEXT        IDC_C3,68,53,40,14,ES_AUTOHSCROLL
+    LTEXT           "C3",IDC_STATIC,44,56,10,8
+    EDITTEXT        IDC_A1R,145,38,40,14,ES_AUTOHSCROLL
+    LTEXT           "A1",IDC_STATIC,121,41,10,8
+    EDITTEXT        IDC_A1I,185,38,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_A2R,145,52,40,14,ES_AUTOHSCROLL
+    LTEXT           "A2",IDC_STATIC,121,55,10,8
+    EDITTEXT        IDC_A2I,185,52,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_B2R,145,66,40,14,ES_AUTOHSCROLL
+    LTEXT           "B2",IDC_STATIC,121,69,9,8
+    EDITTEXT        IDC_B2I,185,66,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_A3R,145,80,40,14,ES_AUTOHSCROLL
+    LTEXT           "A3",IDC_STATIC,121,83,10,8
+    EDITTEXT        IDC_A3I,185,80,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_S3R,145,94,40,14,ES_AUTOHSCROLL
+    LTEXT           "S3",IDC_STATIC,121,97,9,8
+    EDITTEXT        IDC_S3I,185,94,40,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Adjust",IDC_MAKECORRECTED,111,129,50,14
+    LTEXT           "Real",IDC_STATIC,155,30,15,8
+    LTEXT           "Imaginary",IDC_STATIC,188,30,33,8
+END
+
+IDD_MANUAL DIALOGEX 0, 0, 110, 179
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
+FONT 7, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Image Shift",IDC_STATIC,7,7,96,58
+    GROUPBOX        "Image Shift",IDC_STATIC,7,66,96,106
+    PUSHBUTTON      "Up",IDC_BUTTONUP,39,16,30,14
+    PUSHBUTTON      "Down",IDC_BUTTONDOWN,39,44,30,14
+    PUSHBUTTON      "Right",IDC_BUTTONRIGHT,69,30,30,14
+    PUSHBUTTON      "Left",IDC_BUTTONLEFT,9,30,30,14
+    CONTROL         "Coarse",IDC_COARSE,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,40,31,29,12
+    PUSHBUTTON      "Start",IDC_BUTTONSTART,33,75,50,14
+    PUSHBUTTON      "Save ROI Pos",IDC_BUTTONSAVE,33,89,50,14
+    PUSHBUTTON      "Show ROI Pos",IDC_BUTTONSHOW,33,103,50,14
+    PUSHBUTTON      "Finish",IDC_BUTTONFINISH,33,117,50,14
+    PUSHBUTTON      "Clear",IDC_BUTTONCLEAR,34,131,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 177
+    END
+
+    IDD_DIALOG2, DIALOG
+    BEGIN
+        RIGHTMARGIN, 108
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 173
+    END
+
+    IDD_OPTIONSDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 202
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 288
+    END
+
+    IDD_DIALOG3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 218
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_ADJUSTRECON, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 260
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 150
+    END
+
+    IDD_MANUAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 103
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 172
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_DIALOG2 DLGINIT
+BEGIN
+    IDC_COMBO1, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0034, 
+    0
+END
+
+#endif    // English (United Kingdom) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\TemplateMFCDialogPlugIn.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

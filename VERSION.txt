@@ -1,0 +1,10 @@
+
+
+Version 1.4 - Added trial function to register using Mutual Information.
+Version 1.3 - Massive ReWrite of PCPCFWrapper into a seperate class and splitting all sections into seperate functions
+Version 1.2.1 - Added option to specify maximum drift amount to look for between images (untested).
+Version 1.2 - Added search mode for low dose (untested)
+Version 1.1 - Added manual alignment for tricky series
+Version 1.0 - Rewrite from older codes using OpenCL for EWR and adding low dose and voltage to acquisition method. Also updated to use faster acquisition method.
+
+Last Update: 9/08/13
