@@ -10,7 +10,7 @@ template <typename T> int sgn(T val) {
 
 
 const char* code_clJointHistogram2 = 
-"__kernel void clJointHistogram(__global const float* ImageData1, __global const float* ImageData2, __global uint* JointHistogram, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys) \n"
+"__kernel void clJointHistogram(__global const float* restrict ImageData1, __global const float* restrict ImageData2, __global uint* JointHistogram, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys) \n"
 "{ \n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -513,8 +513,8 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 
 						0, NULL, NULL );
 
-			Window(clMem.clImage1,width,height);
-			Window(clMem.clImage2,width,height);
+			//Window(clMem.clImage1,width,height);
+			//Window(clMem.clImage2,width,height);
 
 
 			OpenCLFFT->Enqueue(clMem.clImage1,clMem.clFFTImage1,CLFFT_FORWARD);
@@ -556,7 +556,7 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			//cl_k_Abs.Enqueue(globalWorkSize);
 
 			// Hanning Window the first image.
-			Window(clMem.clRestored,width,height);
+			//Window(clMem.clRestored,width,height);
 
 			OpenCLFFT->Enqueue(clMem.clRestored,clMem.clFFTImage1,CLFFT_FORWARD);
 
@@ -614,7 +614,7 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 0, NULL, NULL );
 
 			// Hanning Window the second image.
-			Window(clMem.clImage2,width,height);
+			//Window(clMem.clImage2,width,height);
 
 			OpenCLFFT->Enqueue(clMem.clImage2,clMem.clFFTImage2,CLFFT_FORWARD);
 
@@ -1120,14 +1120,14 @@ void Registration::AddToReconstruction(std::vector<float> &rotscaledseries, size
 	if(!(gotMTF&&gotNPS))
 	{
 		cl_k_MakeRestored.Enqueue(globalWorkSize);
-		Debug("Made Restored");
+	//	Debug("Made Restored");
 	}
 	else
 	{
 		//cl_k_MakeRestoredMTFNPS.Enqueue(globalWorkSize);
 		//Debug("Made Restored MTFNPS");
 		cl_k_MakeRestored.Enqueue(globalWorkSize);
-		Debug("Made Restored");
+	//	Debug("Made Restored");
 	}
 
 
@@ -1268,10 +1268,13 @@ void Registration::PhaseCompensatedPCF(int numberoftrials, float expectedDF, std
 	float* trialdefocus = new float[numberoftrials];
 	float* peakheights = new float[numberoftrials];
 	
+
+	Debug("Max Shift is " + boost::lexical_cast<string>(options.maxdrift)+"\n");
+
 	for(int trial = 0; trial < numberoftrials; trial++)
 	{
 
-		Utility::SetResultWindow("Trial " + Lex(trial+1) + " of " + Lex(numberoftrials));
+		//Utility::SetResultWindow("Trial " + Lex(trial+1) + " of " + Lex(numberoftrials));
 
 		// go from expected - searchpercentage to expected + searchpercentage
 		float trialdef = CalculateTrialDF(trial,numberoftrials,expectedDF);
@@ -1292,7 +1295,7 @@ void Registration::PhaseCompensatedPCF(int numberoftrials, float expectedDF, std
 		clEnqueueReadBuffer( clState::clq->cmdQueue, clMem.clImage1, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataOne[ 0 ], 
 					0, NULL, NULL );
 
-		Utility::SetResultWindow("Registering Image "+Lex(currentimage)+" at defocus "+Lex(trialdef));
+		//Utility::SetResultWindow("Registering Image "+Lex(currentimage)+" at defocus "+Lex(trialdef));
 
 		// Temporarily display results of PCPCF's
 		//Utility::PrintCLMemToImage(clMem.clImage1,"PCPCF",width,height,clFloat2,clState::clq);

@@ -7,6 +7,7 @@ void WrappedImageOffsets(int pos, int sizeX, int sizeY, int &t, int &b, int &l ,
 	// Translate linear array index into row and column.
 	int indexr = floor(float((pos)/(sizeX)))+1;
 	int indexc = pos + 1 - sizeX*floor(float((pos)/(sizeX)));
+	
 	/*
 	t = indexr - 1 + sizeX*(indexc-2);
 	b = indexr - 1 + sizeX*(indexc);
@@ -20,25 +21,25 @@ void WrappedImageOffsets(int pos, int sizeX, int sizeY, int &t, int &b, int &l ,
 	r = indexc + sizeX*(indexr-1);
 
 	// in top row so top wraps to bottom
-	if(floor(float((pos)/(sizeX))) == 0)
+	if(indexr == 1)
 	{
-		t= pos + (sizeX*sizeY) - sizeX;
+		t = pos + (sizeX*sizeY) - sizeX;
 	}
 
 	// in bottom row so bottom wraps to top
-	if(floor(float((pos)/(sizeX))) == (sizeX - 1))
+	if(indexr == sizeY)
 	{
 		b= pos - (sizeX*sizeY) + sizeX;
 	}
 
 	// in far left so left wraps to right
-	if(indexr == 1)
+	if(indexc == 1)
 	{
 		l += sizeX;
 	}
 
-	// in far left so left wraps to right
-	if(indexr == sizeX)
+	// in far right so right wraps to left
+	if(indexc == sizeX)
 	{
 		r -= sizeX;
 	}
@@ -87,7 +88,7 @@ void PCPCFLib::FindVertexParabola(float xl, float centre, float xr, float yt, fl
 */
 
 
-// BUG: Giving negative peak heights making comparison go wrong....
+// BUG: Giving negative peak heights making comparison go wrong.... (possibly due to abs, or i used abs to try fix this?)
 void PCPCFLib::FindVertexParabola(int maxposition1, int sizeX, int sizeY, std::vector<std::complex<float>> &data, float &xoffset, float &yoffset, float &peakheight)
 {
 	int t;
@@ -101,27 +102,34 @@ void PCPCFLib::FindVertexParabola(int maxposition1, int sizeX, int sizeY, std::v
 	float x1 = -1;
 	float x2 = 0;
 	float x3 = 1;
-	float y1 = hypot(data[l].real(),data[l].imag());
-	float y2 = hypot(data[maxposition1].real(),data[maxposition1].imag());
-	float y3 = hypot(data[r].real(),data[r].imag());
+	float y1 = data[l].real();
+	//float y1 = hypot(data[l].real(),data[l].imag());
+	float y2 = data[maxposition1].real();
+	//float y2 = hypot(data[maxposition1].real(),data[maxposition1].imag());
+	float y3 = data[r].real();
+	//float y3 = hypot(data[r].real(),data[r].imag());
 
-	double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
-	double A     = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
-	double B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
-	double C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
-	xoffset = -B / (2*A);
+	float denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
+	float A     = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
+	float B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
+	float C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
+
+	xoffset = (-B / (2*A),-1.0f);
 	float peak1 = C - B*B / (4*A);
 
-	y1 = hypot(data[t].real(),data[t].imag());
-	y3 = hypot(data[b].real(),data[b].imag());
+	y1 = data[t].real();
+	//y1 = hypot(data[t].real(),data[t].imag());
+	y3 = data[b].real();
+	//y3 = hypot(data[b].real(),data[b].imag());
+
 
 	denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
 	A     = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
 	B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
 	C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
-	yoffset = -B / (2*A);
+	yoffset = (-B / (2*A),-1.0f);
 	float peak2 = C - B*B / (4*A);
 
 	peakheight = (peak1 + peak2) / (2.0f);
@@ -179,7 +187,7 @@ void PCPCFLib::FindVertexParabolaMI(int maxposition1, int sizeX, int sizeY, floa
 void PCPCFLib::GetPeak(float* peak,int maxindexc,int maxindexr,int sizeX,int sizeY, std::vector<std::complex<float>> &data, float &xpos, float &ypos)
 {
 	//NOTE SHOULD DO ABS NOT REAL
-
+	// NOTE NOT SURE THIS IS TRUE AT ALL...
 	float sum = 0;
 	float xweight = 0;
 	float yweight = 0;
@@ -269,10 +277,21 @@ void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subY
 	for(int j = 0; j< sizeY;j++)
 		for(int i = 0; i< sizeX;i++)
 		{	
-			if(maxshift != 0)
+			if(maxshift == 0)
 			{
-				if(i<maxshift || i+maxshift>sizeX)
-					if(j<maxshift || j+maxshift>sizeY)
+				//float val =  sqrt(data[i+j*sizeX].real()*data[i+j*sizeX].real() + data[i+j*sizeX].imag()*data[i+j*sizeX].imag());
+				float val =  data[i+j*sizeX].real();
+
+				if(val > maxheight)
+				{
+					maxheight = val;
+					maxPosition1 = i+j*sizeX;
+				}
+			}
+			else
+			{
+				if(i<maxshift || (i+maxshift)>sizeX)
+					if(j<maxshift || (j+maxshift)>sizeY)
 					{
 						//float val =  sqrt(data[i+j*sizeX].real()*data[i+j*sizeX].real() + data[i+j*sizeX].imag()*data[i+j*sizeX].imag());
 						float val =  data[i+j*sizeX].real();
@@ -285,17 +304,7 @@ void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subY
 						}
 					}
 			}
-			else
-			{
-				//float val =  sqrt(data[i+j*sizeX].real()*data[i+j*sizeX].real() + data[i+j*sizeX].imag()*data[i+j*sizeX].imag());
-				float val =  data[i+j*sizeX].real();
-
-				if(val > maxheight)
-				{
-					maxheight = val;
-					maxPosition1 = i+j*sizeX;
-				}
-			}
+			
 
 		}
 

@@ -38,11 +38,11 @@ void clKernel::BuildKernel() {
 		return;
 	}
 
-	clState::status = clBuildProgram(kernelprogram, clState::cldev->numDevices, clState::cldev->devices, NULL, NULL, NULL);
+	clState::status = clBuildProgram(kernelprogram, clState::cldev->numDevices, &clState::cldev->devices, NULL, NULL, NULL);
 
-	clGetProgramBuildInfo(kernelprogram, NULL, CL_PROGRAM_BUILD_LOG, 0, NULL, &log);
+	clGetProgramBuildInfo(kernelprogram, clState::cldev->devices, CL_PROGRAM_BUILD_LOG, 0, NULL, &log);
 	char * buildlog = (char *)malloc(log * sizeof(char));
-	clGetProgramBuildInfo(kernelprogram, NULL, CL_PROGRAM_BUILD_LOG, log, buildlog, NULL);
+	clGetProgramBuildInfo(kernelprogram, clState::cldev->devices, CL_PROGRAM_BUILD_LOG, log, buildlog, NULL);
 
 	if (!clState::status == 0) {
 		DigitalMicrograph::Result("Problem with " + kernelname + " build " + t_to_string(clState::status));
@@ -103,7 +103,12 @@ void clKernel::Enqueue3D(size_t * globalWorkSize ) {
 
 clDevice::clDevice(cl_uint numDevices, cl_device_id * devices) {
 	this->numDevices = numDevices;
-	this->devices = devices;
+	this->devices = devices[0];
+}
+
+clDevice::clDevice(cl_uint numDevices, cl_device_id  device) {
+	this->numDevices = numDevices;
+	this->devices = device;
 }
 
 cl_int clQueue::SetupQueue(cl_context & context, cl_device_id device) {

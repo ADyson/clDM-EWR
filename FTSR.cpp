@@ -50,6 +50,7 @@ EWR::EWR(CWnd * pParent /*=NULL*/)
 	PCFWrapper.options.startdf = -50;
 	PCFWrapper.options.enddf = 50;
 	PCFWrapper.options.snr = 0.2;
+	PCFWrapper.options.maxdrift = 0;
 
 	// Setting default values to pass into options.
 	maxdrift = "";
@@ -690,7 +691,7 @@ void EWR::ResetOpenCLDevice() {
 		clState::context = clCreateContext(NULL, numDevices, devices, NULL, NULL, &clState::status);
 		clState::clq = new clQueue();
 		clState::clq->SetupQueue(clState::context, devices[devicenumber]);
-		clState::cldev = new clDevice(numDevices, devices);
+		clState::cldev = new clDevice(numDevices, devices[devicenumber]);
 	}
 
 	if (clState::status != CL_SUCCESS) {

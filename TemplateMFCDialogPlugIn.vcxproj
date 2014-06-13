@@ -224,7 +224,7 @@
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
     <Link>
-      <AdditionalDependencies>DMPlugInBasic.lib;Foundation.lib;OpenCL.lib;clAmdFft.Runtime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>DMPlugInBasic.lib;Foundation.lib;OpenCL.lib;clAmdFft.Runtime.lib;clFFT.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>..\lib\$(Platform);C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v4.2\lib\x64;C:\FFTW64;C:\Program Files (x86)\AMD APP\lib\x86_64;C:\Program Files (x86)\AMD\clAmdFft\lib64\import;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
