@@ -34,6 +34,10 @@ public:
 
 	static void GetShiftsMI(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight,
 				float* data, int sizeX, int sizeY, float maxshift);
+		
+	static void GetShiftsMIPreConditioned(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight,
+				float* data, int sizeX, int sizeY, float maxshift, float averagexshift, float averageyshift);
+
 
 	static void PrepareImages(float* Data, int width, int height, int numberofimages);
 

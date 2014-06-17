@@ -115,7 +115,7 @@ void PCPCFLib::FindVertexParabola(int maxposition1, int sizeX, int sizeY, std::v
 	float B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
 	float C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
-	xoffset = (-B / (2*A),-1.0f);
+	xoffset = max(min(-B / (2*A),1.0f),-1.0f); // Bad fits cause subshifts that are way bigger than +-1.0
 	float peak1 = C - B*B / (4*A);
 
 	y1 = data[t].real();
@@ -129,7 +129,7 @@ void PCPCFLib::FindVertexParabola(int maxposition1, int sizeX, int sizeY, std::v
 	B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
 	C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
-	yoffset = (-B / (2*A),-1.0f);
+	yoffset = max(min(-B / (2*A),1.0f),-1.0f);
 	float peak2 = C - B*B / (4*A);
 
 	peakheight = (peak1 + peak2) / (2.0f);
@@ -157,12 +157,12 @@ void PCPCFLib::FindVertexParabolaMI(int maxposition1, int sizeX, int sizeY, floa
 	float y2 = data[maxposition1];
 	float y3 = data[r];
 
-	double denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
-	double A     = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
-	double B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
-	double C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
+	float denom = (x1 - x2) * (x1 - x3) * (x2 - x3);
+	float A     = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / denom;
+	float B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
+	float C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
-	xoffset = -B / (2*A);
+	xoffset = max(min(-B / (2*A),1.0f),-1.0f); 
 	float peak1 = C - B*B / (4*A);
 
 	y1 = data[t];
@@ -173,7 +173,7 @@ void PCPCFLib::FindVertexParabolaMI(int maxposition1, int sizeX, int sizeY, floa
 	B     = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / denom;
 	C     = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / denom;
 
-	yoffset = -B / (2*A);
+	yoffset = max(min(-B / (2*A),1.0f),-1.0f); 
 	float peak2 = C - B*B / (4*A);
 
 	peakheight = (peak1 + peak2) / (2.0f);
@@ -219,8 +219,9 @@ void PCPCFLib::GetPeak(float* peak,int maxindexc,int maxindexr,int sizeX,int siz
 
 void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight, std::vector<std::complex<float>> &data, int sizeX, int sizeY)
 {
+	// Sometimes the highest value within the range set by maxshift is still negative...
+	maxheight = -FLT_MAX;
 
-	maxheight = 0.0f;
 	int maxPosition1 = 0;
 
 	for(int j = 0; j< sizeX*sizeY;j++)
@@ -269,11 +270,13 @@ void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subY
 void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight, 
 						 std::vector<std::complex<float>> &data, int sizeX, int sizeY, float maxshift)
 {
-	
-	maxheight = 0.0f;
+	// Sometimes the highest value within the range set by maxshift is still negative...
+	maxheight = -FLT_MAX;
 	int maxPosition1 = 0;
 
 	// Modify to only look for a max with a certain range.
+	int testpixels = 0;
+
 	for(int j = 0; j< sizeY;j++)
 		for(int i = 0; i< sizeX;i++)
 		{	
@@ -289,24 +292,28 @@ void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subY
 				}
 			}
 			else
-			{
-				if(i<maxshift || (i+maxshift)>sizeX)
-					if(j<maxshift || (j+maxshift)>sizeY)
+			{		
+				// This selects a square not a circular range :(
+				//if(i<maxshift || (i+maxshift)>=sizeX)
+					//if(j<maxshift || (j+maxshift)>=sizeY)
+				if(i*i + j*j <= maxshift*maxshift || (i-sizeX)*(i-sizeX)+ j*j <= maxshift*maxshift || (i-sizeX)*(i-sizeX) + (j-sizeY)*(j-sizeY) <= maxshift*maxshift || i*i + (j-sizeY)*(j-sizeY) <= maxshift*maxshift)
 					{
 						//float val =  sqrt(data[i+j*sizeX].real()*data[i+j*sizeX].real() + data[i+j*sizeX].imag()*data[i+j*sizeX].imag());
+						testpixels++;
 						float val =  data[i+j*sizeX].real();
-					//	pcpcfdata[j] = val;
+						//	pcpcfdata[j] = val;
 
 						if(val > maxheight)
 						{
+							Debug("found \n");
 							maxheight = val;
 							maxPosition1 = i+j*sizeX;
 						}
 					}
 			}
-			
-
 		}
+
+	Debug(Lex(testpixels)+"\n");
 
 	// Translate linear array index into row and column.
 	int maxindexr = floor(float((maxPosition1)/(sizeX)))+1;
@@ -334,25 +341,30 @@ void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subY
 
 	// Parabola Vertex Mode
 	PCPCFLib::FindVertexParabola(maxPosition1,sizeX,sizeY, data, subXShift, subYShift, maxheight);
+
+	Debug("subx "+Lex(subXShift)+"\n");
 }
 
 void PCPCFLib::GetShiftsMI(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight, 
 						 float* data, int sizeX, int sizeY, float maxshift)
 {
 	
-	maxheight = 0.0f;
+	maxheight = -FLT_MAX;
 	int maxPosition1 = 0;
 
 	// Modify to only ook for a max with a certain range.
 	for(int j = 0; j< sizeY;j++)
 		for(int i = 0; i< sizeX;i++)
 		{	
-			float val = data[i+j*sizeX];
-
-			if(val > maxheight)
+			if(i!=sizeX/2 && j!=sizeY/2)
 			{
-				maxheight = val;
-				maxPosition1 = i+j*sizeX;
+				float val = data[i+j*sizeX];
+
+				if(val > maxheight)
+				{
+					maxheight = val;
+					maxPosition1 = i+j*sizeX;
+				}
 			}
 		}
 
@@ -373,6 +385,51 @@ void PCPCFLib::GetShiftsMI(int &xShift, int &yShift, float &subXShift, float &su
 	PCPCFLib::FindVertexParabolaMI(maxPosition1,sizeX,sizeY, data, subXShift, subYShift, maxheight);
 }
 
+
+void PCPCFLib::GetShiftsMIPreConditioned(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight, 
+						 float* data, int sizeX, int sizeY, float maxshift, float averagexshift, float averageyshift)
+{
+	
+	maxheight = -FLT_MAX;
+	int maxPosition1 = 0;
+
+	// Expected maxposition...
+	int xc = round(averagexshift) + sizeX/2;
+	int yc = round(averageyshift) + sizeY/2;
+
+
+	// Modify to only look for a max with a certain range.
+	for(int j = 0; j< sizeY;j++)
+		for(int i = 0; i< sizeX;i++)
+		{	
+			if(i!=sizeX/2 && j!=sizeY/2)
+			{
+				float val = data[i+j*sizeX];
+
+				if(val > maxheight)
+				{
+					maxheight = val;
+					maxPosition1 = i+j*sizeX;
+				}
+			}
+		}
+
+	// Translate linear array index into row and column.
+	int maxindexr = floor(float((maxPosition1)/(sizeX)))+1;
+	int maxindexc = maxPosition1 + 1 - sizeX*floor(float((maxPosition1)/(sizeX)));
+
+
+	// The zero position is at INDEX width/2 and height/2 i.e 16th element if width is 30...
+
+
+	// Shift is positive or negative depending on image quadrant it appears in.
+	yShift = maxindexr - (1+sizeX/2); // 0 if max is at 31st element of the 60..
+	xShift = maxindexc - (1+sizeY/2);
+				
+
+	// Parabola Vertex Mode
+	PCPCFLib::FindVertexParabolaMI(maxPosition1,sizeX,sizeY, data, subXShift, subYShift, maxheight);
+}
 void PCPCFLib::PrepareImages(float* Data, int width, int height, int numberofimages)
 {
 	// Loop over each image to find the average value and divide through by it.

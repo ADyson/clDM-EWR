@@ -86,7 +86,7 @@ const char* code_clEntropy =
 // 400 Joint histograms at once like a badass kernel...
 // So Parallel, Much Histogram, Very GPU, WOW
 const char* code_clJointHistogramMULTIFix =
-"__kernel void clJointHistogramMULTI(__global const float* ImageData1, __global const float* ImageData2, __global int* JointHistograms, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys,  __local int* tmp_histogram2) \n"
+"__kernel void clJointHistogramMULTI(__global const float* restrict ImageData1, __global const float* restrict ImageData2, __global int* restrict JointHistograms, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys,  __local int* restrict tmp_histogram2) \n"
 "{ \n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -403,6 +403,9 @@ void Registration::BuildKernels()
 	cl_k_Q.SetCodeAndName(getQsource2,"clCalculateQ");
 	cl_k_Q.BuildKernel();
 
+
+
+
 	cl_k_SumReduction.SetCodeAndName(sumReductionsource2,"clSumReduction");
 	cl_k_SumReduction.BuildKernel();
 
@@ -434,6 +437,9 @@ void Registration::BuildKernels()
 
 		cl_k_MakeRestoredMTFNPS.SetCodeAndName(makerestoredMTFNPSsource2,"clMakeRestoredMTFNPS");
 		cl_k_MakeRestoredMTFNPS.BuildKernel();
+
+		cl_k_Q2.SetCodeAndName(getQsource2NPS,"clCalculateQ");
+		cl_k_Q2.BuildKernel();
 	}
 
 }
@@ -513,8 +519,8 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 
 						0, NULL, NULL );
 
-			//Window(clMem.clImage1,width,height);
-			//Window(clMem.clImage2,width,height);
+			Window(clMem.clImage1,width,height);
+			Window(clMem.clImage2,width,height);
 
 
 			OpenCLFFT->Enqueue(clMem.clImage1,clMem.clFFTImage1,CLFFT_FORWARD);
@@ -556,7 +562,7 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			//cl_k_Abs.Enqueue(globalWorkSize);
 
 			// Hanning Window the first image.
-			//Window(clMem.clRestored,width,height);
+			Window(clMem.clRestored,width,height);
 
 			OpenCLFFT->Enqueue(clMem.clRestored,clMem.clFFTImage1,CLFFT_FORWARD);
 
@@ -614,7 +620,7 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 0, NULL, NULL );
 
 			// Hanning Window the second image.
-			//Window(clMem.clImage2,width,height);
+			Window(clMem.clImage2,width,height);
 
 			OpenCLFFT->Enqueue(clMem.clImage2,clMem.clFFTImage2,CLFFT_FORWARD);
 
@@ -628,7 +634,6 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			}
 
 			
-
 			PhaseCompensatedPCF(numberoftrials,expecteddifference,dataOne,preshiftx, preshifty,globalWorkSize);
 
 			ImageList.push_back(currentimage);
@@ -648,7 +653,14 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	
 	// Output this reconstruction
 	OpenCLFFT->Enqueue(clMem.clFFTImage1,clMem.clRestored,CLFFT_BACKWARD);
-	Utility::PrintCLMemToImagePlusOne(clMem.clRestored,"Restored EW",width,height,clFloat2,clState::clq);
+	DigitalMicrograph::Image PrelimRecon = Utility::PrintCLMemToImagePlusOne(clMem.clRestored,"Restored EW",width,height,clFloat2,clState::clq);
+
+	
+	DigitalMicrograph::TagGroup PrelimReconTags = PrelimRecon.GetTagGroup();
+	PrelimReconTags.SetTagAsFloat("Reconstruction:Kmax",Aberrations.kmax);
+	PrelimReconTags.SetTagAsFloat("Reconstruction:Wavelength",wavelength);
+	PrelimRecon.SetDimensionScale(0,pixelscale);
+	PrelimRecon.SetDimensionScale(1,pixelscale);
 
 	// Produce a drift corrected series
 	MakeDriftCorrectedSeries(rotscaledseries,globalWorkSize);
@@ -823,6 +835,9 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 		} 
 		else 
 		{
+			// Determine position we expect the peak to be at based on average shift size on either side of reference image....
+
+
 			// Set Current Image to next image to register.
 			IterateImageNumber();
 			
@@ -945,7 +960,14 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 	
 	// Output this reconstruction
 	OpenCLFFT->Enqueue(clMem.clFFTImage1,clMem.clRestored,CLFFT_BACKWARD);
-	Utility::PrintCLMemToImagePlusOne(clMem.clRestored,"Restored EW",width,height,clFloat2,clState::clq);
+	DigitalMicrograph::Image PrelimRecon = Utility::PrintCLMemToImagePlusOne(clMem.clRestored,"Restored EW",width,height,clFloat2,clState::clq);
+
+	
+	DigitalMicrograph::TagGroup PrelimReconTags = PrelimRecon.GetTagGroup();
+	PrelimReconTags.SetTagAsFloat("Reconstruction:Kmax",Aberrations.kmax);
+	PrelimReconTags.SetTagAsFloat("Reconstruction:Wavelength",wavelength);
+	PrelimRecon.SetDimensionScale(0,pixelscale);
+	PrelimRecon.SetDimensionScale(1,pixelscale);
 
 	// Produce a drift corrected series
 	MakeDriftCorrectedSeries(rotscaledseries,globalWorkSize);
@@ -1124,9 +1146,9 @@ void Registration::AddToReconstruction(std::vector<float> &rotscaledseries, size
 	}
 	else
 	{
-		//cl_k_MakeRestoredMTFNPS.Enqueue(globalWorkSize);
-		//Debug("Made Restored MTFNPS");
-		cl_k_MakeRestored.Enqueue(globalWorkSize);
+		cl_k_MakeRestoredMTFNPS.Enqueue(globalWorkSize);
+		Debug("Made Restored MTFNPS");
+		//cl_k_MakeRestored.Enqueue(globalWorkSize);
 	//	Debug("Made Restored");
 	}
 
@@ -1322,7 +1344,7 @@ void Registration::PhaseCompensatedPCF(int numberoftrials, float expectedDF, std
 	// Shifts now expressed in terms of difference to reference image.
 
 	// Get best value and store in shifts.
-	float bestheight = FLT_MIN;
+	float bestheight = -FLT_MAX;
 	for(int trial = 0; trial < numberoftrials; trial++)
 	{
 		if(peakheights[trial] > bestheight)
@@ -1556,6 +1578,29 @@ void Registration::MutualInformation(int numberoftrials, float expectedDF, std::
 
 void Registration::MutualInformationFast(int numberoftrials, float expectedDF, std::vector<std::complex<float>> &dataOne, std::vector<std::complex<float>> &dataTwo, int preshiftx, int preshifty, size_t* globalWorkSize, int miSize, DigitalMicrograph::Image &MIMap, int imagenumber)
 {
+
+			float averagexshift =0;
+			float averageyshift =0;
+
+			for(int i = 1; i < ImageList.size(); i++)
+			{
+				float xshift = xShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
+				float yshift = yShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
+
+				averagexshift+=xshift;
+				averageyshift+=yshift;
+			}
+
+			averagexshift/=(ImageList.size()-1);
+			averageyshift/=(ImageList.size()-1);
+
+			Debug("Average x shift is " + Lex(averagexshift));
+			Debug("Average y shift is " + Lex(averageyshift));
+
+			int xc = round(averagexshift)*sgn(currentimage-referenceimage) + miSize/2;
+			int yc = round(averageyshift)*sgn(currentimage-referenceimage) + miSize/2;
+
+
 	// Create arrays to hold results of each individual trial run
 	int* zeroes = new int[256*256*20*20];
 	for (int i = 0 ; i < 256*256*20*20; i++)
@@ -1781,7 +1826,7 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 
 							float mi = eA + eB - SumReductionFloat(clGPUEntropy,globalSizeSum,localSizeSum,256,256*256,0);
 
-							mapdata[imagenumber*miSize*miSize + (k+xx)+miSize*(l+yy)] = mi;
+							mapdata[imagenumber*miSize*miSize + (k+xx)+miSize*(l+yy)] = mi * (80.0f/(80.0f + abs(k+xx-xc)))*(80.0f/(80.0f + abs(l+yy-yc)));
 
 						}
 			}
@@ -1807,7 +1852,7 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 		float maxHeight1;
 
 		// Translate linear array index into row and column.
-		PCPCFLib::GetShiftsMI(xShift,yShift,subXShift,subYShift,maxHeight1,mapdata+imagenumber*miSize*miSize,miSize,miSize,options.maxdrift);
+		PCPCFLib::GetShiftsMIPreConditioned(xShift,yShift,subXShift,subYShift,maxHeight1,mapdata+imagenumber*miSize*miSize,miSize,miSize,options.maxdrift,averagexshift*sgn(currentimage-referenceimage),averageyshift*sgn(currentimage-referenceimage));
 
 		xShiftVals[currentimage] =  preshiftx + xShift;
 		yShiftVals[currentimage] = preshifty + yShift;
@@ -1884,21 +1929,49 @@ void Registration::MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries,
 
 void Registration::SetupPCI(size_t* globalWorkSize)
 {
-	// Set Kernel Arguments
-	cl_k_Q.SetArgT(0,clMem.clW);
-	cl_k_Q.SetArgT(1,clMem.clWminus);
-	cl_k_Q.SetArgT(2,clMem.clV);
-	cl_k_Q.SetArgT(3,clMem.clQ);
-	cl_k_Q.SetArgT(4,width);
-	cl_k_Q.SetArgT(5,height);
-	cl_k_Q.SetArgT(6,options.snr);
+
+	float newsnr = 1/options.snr;
+	
+	if(gotMTF&&gotNPS)
+	{
+		// Set Kernel Arguments
+		cl_k_Q2.SetArgT(0,clMem.clW);
+		cl_k_Q2.SetArgT(1,clMem.clWminus);
+		cl_k_Q2.SetArgT(2,clMem.clV);
+		cl_k_Q2.SetArgT(3,clMem.clQ);
+		cl_k_Q2.SetArgT(4,width);
+		cl_k_Q2.SetArgT(5,height);
+		cl_k_Q2.SetArgT(6,options.snr);
+		cl_k_Q2.SetArgT(7,clMem.clNPS);
+		cl_k_Q2.SetArgT(8,scaleMTFx);
+		cl_k_Q2.SetArgT(9,scaleMTFy);
+		cl_k_Q2.SetArgT(10,mtflength);
+	}
+	else
+	{
+		// Set Kernel Arguments
+		cl_k_Q.SetArgT(0,clMem.clW);
+		cl_k_Q.SetArgT(1,clMem.clWminus);
+		cl_k_Q.SetArgT(2,clMem.clV);
+		cl_k_Q.SetArgT(3,clMem.clQ);
+		cl_k_Q.SetArgT(4,width);
+		cl_k_Q.SetArgT(5,height);
+		cl_k_Q.SetArgT(6,newsnr);
+	}
 
 	cl_k_MinusWavefunction.SetArgT(0,clMem.clFFTImage1); // Was clRestored but this was inverse FFT for display not frequency space -BUGFIX-
 	cl_k_MinusWavefunction.SetArgT(1,clMem.clRestoredMinus);
 	cl_k_MinusWavefunction.SetArgT(2,width);
 	cl_k_MinusWavefunction.SetArgT(3,height);
 
-	cl_k_Q.Enqueue(globalWorkSize);
+	if(gotMTF&&gotNPS)
+	{
+		cl_k_Q2.Enqueue(globalWorkSize);
+	}
+	else
+	{
+		cl_k_Q.Enqueue(globalWorkSize);
+	}
 	cl_k_MinusWavefunction.Enqueue(globalWorkSize);
 
 
@@ -2039,6 +2112,11 @@ void Registration::SetFixedArgs(ROIPositions ROIpos,cl_mem &clxFrequencies, cl_m
 	int width = ROIpos.Width();
 	int height = ROIpos.Height();
 
+	// SNR from options is now just Ps....
+	// Get SNR for no NPS by using Pn/Ps for Pn = 1;
+
+	float newsnr = 1/options.snr;
+
 	cl_k_PCPCF.SetArgT(0,clMem.clFFTImage1);
 	cl_k_PCPCF.SetArgT(1,clMem.clFFTImage2);
 	cl_k_PCPCF.SetArgT(2,clMem.clPCPCFResult);
@@ -2125,7 +2203,7 @@ void Registration::SetFixedArgs(ROIPositions ROIpos,cl_mem &clxFrequencies, cl_m
 	cl_k_MakeRestored.SetArgT(5,clMem.clFFTImage1);
 	cl_k_MakeRestored.SetArgT(6,width);
 	cl_k_MakeRestored.SetArgT(7,height);
-	cl_k_MakeRestored.SetArgT(8,options.snr);
+	cl_k_MakeRestored.SetArgT(8,newsnr);
 
 	cl_k_RotScale.SetArgT(0,clMem.fullImage);
 	cl_k_RotScale.SetArgT(1,clMem.rotScaleImage);
@@ -2154,6 +2232,7 @@ void Registration::SetFixedArgs(ROIPositions ROIpos,cl_mem &clxFrequencies, cl_m
 		cl_k_MakeRestoredMTFNPS.SetArgT(10,mtflength);
 		cl_k_MakeRestoredMTFNPS.SetArgT(11,scaleMTFx);
 		cl_k_MakeRestoredMTFNPS.SetArgT(12,scaleMTFy);
+		cl_k_MakeRestoredMTFNPS.SetArgT(13,options.snr);
 
 		cl_k_WaveTransferFunctionMTF.SetArgT(0,clMem.clw);
 		cl_k_WaveTransferFunctionMTF.SetArgT(1,clxFrequencies);

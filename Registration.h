@@ -127,6 +127,7 @@ public:
 	clKernel cl_k_MakeRestored;
 	clKernel cl_k_RotScale;
 	clKernel cl_k_Q;
+	clKernel cl_k_Q2;
 	clKernel cl_k_SumReduction;
 	clKernel cl_k_SumReductionFloat;
 	clKernel cl_k_SumReductionUint;

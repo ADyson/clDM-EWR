@@ -1,6 +1,6 @@
 ﻿// EWR.cpp : implementation file
 //
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+//#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 
 #include "stdafx.h"
 #include "FTSR.h"
@@ -489,7 +489,6 @@ void EWR::UpdateOptions2(std::string pcfkmax, std::string pcftrials, std::string
 
 // Open Image Series as Stack Button
 void EWR::OnBnClickedOptionsbutton2() {
-	// TODO: Add your control notification handler code here
 	std::vector<std::string> filepaths;
 	std::vector<DigitalMicrograph::Image> images;
 
