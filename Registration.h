@@ -109,6 +109,7 @@ public:
 	bool noalign;
 	// Vector to hold IDs of registered images as they are completed.
 	std::vector<int> ImageList;
+	std::vector<cl_mem> fullimages;
 
 	// Open CL Memories
 	clRegistrationMemories clMem;

@@ -99,10 +99,10 @@ void clState::Setup()
 		DigitalMicrograph::Result("To change edit the Global Tags OpenCL:Platform and OpenCL:Device then restart DM\n");
 		OpenCLAvailable = true;
 
-		context = clCreateContext(NULL,numDevices,&devices[devicenumber],NULL,NULL,&status);
+		context = clCreateContext(NULL,1,&devices[devicenumber],NULL,NULL,&status);
 		clq = new clQueue();
 		clq->SetupQueue(context,devices[devicenumber]);
-		cldev = new clDevice(numDevices,&devices[devicenumber]);
+		cldev = new clDevice(1,&devices[devicenumber]);
 	}
 	if(status!=CL_SUCCESS)
 	{

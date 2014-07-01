@@ -520,7 +520,10 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	SetFixedArgs(ROIpos,clxFrequencies,clyFrequencies,wavelength);
 
 	// Make a new rotation aligned stack based on the expected defocus step.
-	std::vector<float> rotscaledseries(fullwidth*fullheight*NumberOfImages);
+	//std::vector<float> rotscaledseries(fullwidth*fullheight*NumberOfImages);
+
+	//Not needed now
+	std::vector<float> rotscaledseries;
 
 	// Make new series of rotated and scaled data or just copy data if no rotation magnification is required.
 	RotationScale(seriesdata,fullWorkSize,rotscaledseries);
@@ -530,11 +533,10 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	std::vector< std::complex< float > > dataTwo( width*height );
 
 	// Check if reference image is allowed...
-	if(referenceimage >=NumberOfImages )
+	if(referenceimage >= NumberOfImages )
 	{
 		referenceimage = NumberOfImages - 1;
 	}
-
 
 	referenceimage = options.reference;
 	int imageone = referenceimage;
@@ -550,6 +552,16 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 		{
 			// Set Current Image to next image to register.
 			IterateImageNumber();
+			DeterminePadding(ROIpos);
+
+			float zero = 0;
+
+			cl_k_PadCrop.SetArgT(4,padLeft);
+			cl_k_PadCrop.SetArgT(5,padRight);
+			cl_k_PadCrop.SetArgT(6,padTop);
+			cl_k_PadCrop.SetArgT(7,padBottom);
+			cl_k_PadCrop.SetArgT(8,zero);
+			cl_k_PadCrop.SetArgT(9,zero);
 
 			// Work out what focus difference is expected between these 2 images.
 
@@ -557,17 +569,28 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			// Positive focus difference if imagetwo > imageone
 			float expecteddifference = CalculateExpectedDF(imageone,currentimage);
 
-			CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
-			CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
+			//CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
+			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
 
+			cl_k_PadCrop.SetArgT(0,fullimages[imageone]);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
+			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			cl_k_PadCrop.SetArgT(0,fullimages[currentimage]);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage2);
+			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			// Reset arguments to defaults
+			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
 
 			// Insert Magnification Finding Routine
 			//MagnificationPCF(30,expecteddifference,dataOne,0,0,globalWorkSize,rotscaledseries,ROIpos.iLeft,ROIpos.iTop,currentimage);
 
-			clEnqueueWriteBuffer( clState::clq->cmdQueue , clMem.clImage1, CL_FALSE, 0, width*height*sizeof(std::complex<float>) , &dataOne[ 0 ], 
-						0, NULL, NULL );
-			clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 
-						0, NULL, NULL );
+			//clEnqueueWriteBuffer( clState::clq->cmdQueue , clMem.clImage1, CL_FALSE, 0, width*height*sizeof(std::complex<float>) , &dataOne[ 0 ], 
+			//			0, NULL, NULL );
+			//clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 
+			//			0, NULL, NULL );
 
 			Window(clMem.clImage1,width,height);
 			Window(clMem.clImage2,width,height);
@@ -575,7 +598,6 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 
 			//Start timer
 			clock_t begin = clock();
-
 
 			OpenCLFFT->Enqueue(clMem.clImage1,clMem.clFFTImage1,CLFFT_FORWARD);
 			OpenCLFFT->Enqueue(clMem.clImage2,clMem.clFFTImage2,CLFFT_FORWARD);
@@ -633,7 +655,6 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 
 			OpenCLFFT->Enqueue(clMem.clRestored,clMem.clFFTImage1,CLFFT_FORWARD);
 
-
 			// Determine the amount to preshift the next image by so it is already closer to alignment (i.e start from alignment of next closest image)
 			bool prevImageRegistered = false;
 			bool nextImageRegistered = false;
@@ -682,9 +703,27 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 				preshiftx -=( ROIpos.iTop + preshifty + height - fullheight);
 
 
-			CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,preshiftx,preshifty);
+			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,preshiftx,preshifty);
 
-			clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 0, NULL, NULL );
+			float presx = preshiftx;
+			float presy = preshifty;
+
+			cl_k_PadCrop.SetArgT(4,padLeft);
+			cl_k_PadCrop.SetArgT(5,padRight);
+			cl_k_PadCrop.SetArgT(6,padTop);
+			cl_k_PadCrop.SetArgT(7,padBottom);
+			cl_k_PadCrop.SetArgT(8,presx);
+			cl_k_PadCrop.SetArgT(9,presy);
+
+			cl_k_PadCrop.SetArgT(0,fullimages[currentimage]);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage2);
+			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			// Reset arguments to defaults
+			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
+
+			//clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 0, NULL, NULL );
 
 			// Hanning Window the second image.
 			Window(clMem.clImage2,width,height);
@@ -716,7 +755,6 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 
 	// Add all images to reconstruction
 	AddToReconstruction(rotscaledseries,globalWorkSize,0,0,0);
-
 	
 	// Output this reconstruction
 	OpenCLFFT->Enqueue(clMem.clFFTImage1,clMem.clRestored,CLFFT_BACKWARD);
@@ -810,6 +848,15 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	clMem.CleanUp(gotMTF&&gotNPS);
 	rotscaledseries.clear();
 	KernelCleanUp();
+
+	for(int i = 0; i < fullimages.size(); i++)
+	{
+		clReleaseMemObject(fullimages[i]);
+	}
+
+	
+	clReleaseMemObject(ReductionResult);
+	clReleaseMemObject(ReductionPosition);
 }
 
 void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem &clxFrequencies, cl_mem &clyFrequencies)
@@ -1155,11 +1202,13 @@ void Registration::AddToReconstruction(std::vector<float> &rotscaledseries, size
 		cl_k_PadCrop.SetArgT(9,subYShifts[ImageList[i]]);
 				
 		// Copy correct image into full image..
-		std::vector<cl_float2> image(fullwidth*fullheight);
+		//std::vector<cl_float2> image(fullwidth*fullheight);
 
 		// Now add image to reconstruction - Make WTF - WTFminus			
 		float defocus = defocusshifts[ImageList[i]] + DfGuess;
 
+		
+		/* This is all stored in clmems now....
 		// Unroll by 4
 		for(int j = 0 ; j < fullwidth*fullheight/4 ; j++)
 		{
@@ -1177,6 +1226,9 @@ void Registration::AddToReconstruction(std::vector<float> &rotscaledseries, size
 		}
 
 		clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&image[0],0,NULL,NULL);
+		*/
+		cl_k_PadCrop.SetArgT(0,fullimages[ImageList[i]]);
+		cl_k_PadCrop.SetArgT(1,clMem.clImage1);
 		cl_k_PadCrop.Enqueue(globalWorkSize);
 
 		// Check if PadCrop did anything
@@ -1221,6 +1273,11 @@ void Registration::AddToReconstruction(std::vector<float> &rotscaledseries, size
 		clFinish(clState::clq->cmdQueue);
 
 		Debug(Lex(i));
+
+		// Reset default arguments
+		cl_k_PadCrop.SetArgT(0,clMem.fullImage);
+
+
 	}
 	// make restored
 	if(!(gotMTF&&gotNPS))
@@ -1250,8 +1307,8 @@ void::Registration::MagnificationPCF(int numberoftrials, float expectedDF, std::
 	fullWorkSize[2] = 1;
 
 	// Put into full, image, call rotscale, get from rotscale image.. arg 4 = magcal...
-	std::vector<std::complex<float>> copyImage(fullwidth * fullheight) ;
-	std::vector<std::complex<float>> returnImage(fullwidth * fullheight) ;
+	std::vector<float> copyImage(fullwidth * fullheight) ;
+	std::vector<float> returnImage(fullwidth * fullheight) ;
 
 	std::vector<std::complex<float>> data(width * height) ;
 
@@ -1272,13 +1329,13 @@ void::Registration::MagnificationPCF(int numberoftrials, float expectedDF, std::
 		float scale = minscale + trial * (maxscale-minscale)/numberoftrials;	
 		// Retrieve and put back in copy image...
 
-		clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&copyImage[0],0,NULL,NULL);
+		clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float),&copyImage[0],0,NULL,NULL);
 
 		cl_k_RotScale.SetArgT(6,expectedDF);
 		cl_k_RotScale.SetArgT(4,scale);
 		cl_k_RotScale.Enqueue(fullWorkSize);
 
-		clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.rotScaleImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&returnImage[0],0,NULL,NULL);
+		clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.rotScaleImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float),&returnImage[0],0,NULL,NULL);
 
 		// Now get the roi region and determine shifts with it...
 
@@ -1966,11 +2023,11 @@ void Registration::MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries,
 		cl_k_PadCrop.SetArgT(9,subYShifts[i]);
 				
 		// Copy correct image into full image..
-		std::vector<cl_float2> image(fullwidth*fullheight);
+		//std::vector<cl_float2> image(fullwidth*fullheight);
 
 		// Now add image to reconstruction - Make WTF - WTFminus			
 		float defocus = defocusshifts[i];
-			
+		/*	
 		for(int j = 0 ; j < fullwidth*fullheight ; j++)
 		{
 			image[j].s[0] = rotscaledseries[i*fullwidth*fullheight + j];
@@ -1979,6 +2036,8 @@ void Registration::MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries,
 
 		// Copy full image to GPU and run crop kernel
 		clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&image[0],0,NULL,NULL);
+		*/
+		cl_k_PadCrop.SetArgT(0,fullimages[i]);
 		cl_k_PadCrop.Enqueue(globalWorkSize);
 
 		// Copy image data back to host
@@ -1990,7 +2049,7 @@ void Registration::MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries,
 			driftstack[i*width*height + k] = cropimage[k].s[0];
 		}
 
-		image.clear();
+		//image.clear();
 	}
 
 	cropimage.clear();
@@ -2361,7 +2420,7 @@ void Registration::SetFixedArgs(ROIPositions ROIpos,cl_mem &clxFrequencies, cl_m
 
 void Registration::RotationScale(float* seriesdata, size_t* fullWorkSize, std::vector<float> &rotscaledseries)
 {
-	std::vector<std::complex<float>> copyImage(fullwidth * fullheight) ;
+	std::vector<float> copyImage(fullwidth * fullheight) ;
 
 	// Rotate and Scale this image by expected defocus..
 	// To prevent edges going missing should start at end that should be smallest so all images are only scaled upwards....
@@ -2391,28 +2450,44 @@ void Registration::RotationScale(float* seriesdata, size_t* fullWorkSize, std::v
 					copyImage[i+j*fullwidth] = seriesdata[im*fullwidth*fullheight + i + (j)*fullwidth];
 				}
 
-			clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&copyImage[0],0,NULL,NULL);
+			clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float),&copyImage[0],0,NULL,NULL);
 
+			fullimages.push_back(clCreateBuffer(clState::context,CL_MEM_READ_WRITE,fullwidth*fullheight*sizeof(cl_float),0,0));
+
+			cl_k_RotScale.SetArgT(1,fullimages[im]);
 			cl_k_RotScale.Enqueue(fullWorkSize);
 
-			clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.rotScaleImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&copyImage[0],0,NULL,NULL);
+			/*clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.rotScaleImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&copyImage[0],0,NULL,NULL);
 
 			for(int j = 0; j < fullheight;j++)
 				for(int i = 0; i < fullwidth;i++)
 				{
 					rotscaledseries[im*fullwidth*fullheight + i + j*fullwidth] = copyImage[i + (j)*fullwidth].real();
 				}
+				*/
 		}		
 	} 
 	else
 	{
 		// Fill new series with old series data.
 		for(int im = 0; im < NumberOfImages ; im++ )
-			for(int j = 0; j < fullheight;j++)
+		{
+			// Copy image into fullimage
+			for(int j = 0; j < fullheight; j++)
+				for(int i = 0; i < fullwidth; i++)
+				{
+					copyImage[i+j*fullwidth] = seriesdata[im*fullwidth*fullheight + i + (j)*fullwidth];
+				}
+
+				fullimages.push_back(clCreateBuffer(clState::context,CL_MEM_READ_WRITE,fullwidth*fullheight*sizeof(cl_float),0,0));
+				clEnqueueWriteBuffer(clState::clq->cmdQueue,fullimages[im],CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float),&copyImage[0],0,NULL,NULL);
+			
+			/*for(int j = 0; j < fullheight;j++)
 				for(int i = 0; i < fullwidth;i++)
 				{
 					rotscaledseries[im*fullwidth*fullheight +i + j*fullwidth] = seriesdata[im*fullwidth*fullheight +i + j*fullwidth];
-				}
+				}*/
+		}
 	}
 
 	copyImage.clear();
@@ -2677,8 +2752,8 @@ void clRegistrationMemories::SetupGroupOne(int width, int height, int fullwidth,
 	clFFTImage2		= clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, width * height * sizeof(cl_float2), 0, &clState::status);
 	clPCPCFResult	= clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, width * height * sizeof(cl_float2), 0, &clState::status);
 
-	fullImage		= clCreateBuffer( clState::context, CL_MEM_READ_WRITE, fullwidth * fullheight * sizeof(cl_float2), 0, &clState::status);
-	rotScaleImage	= clCreateBuffer( clState::context, CL_MEM_READ_WRITE, fullwidth * fullheight * sizeof(cl_float2), 0, &clState::status);
+	fullImage		= clCreateBuffer( clState::context, CL_MEM_READ_WRITE, fullwidth * fullheight * sizeof(cl_float), 0, &clState::status);
+	rotScaleImage	= clCreateBuffer( clState::context, CL_MEM_READ_WRITE, fullwidth * fullheight * sizeof(cl_float), 0, &clState::status);
 
 	clW				= clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, width *height * sizeof( float ), 0, &clState::status);
 	clWminus		= clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, width *height * sizeof( float ), 0, &clState::status);
@@ -2728,7 +2803,6 @@ void clRegistrationMemories::CleanUp(bool mtfnps)
 	clReleaseMemObject(clPCIM);
 	clReleaseMemObject(clPCIS);
 	clReleaseMemObject(clSumOutput);
-
 
 	if(mtfnps)
 	{
