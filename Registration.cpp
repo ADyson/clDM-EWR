@@ -7,7 +7,47 @@
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
-
+const char* code_clMaxReduction = 
+"__kernel void clMaxReduction(__global float2* restrict buffer, \n"
+"            __local float* scratch, \n"
+"            __local uint* scratchpos, \n"
+"            __const int length, \n"
+"            __global float* restrict result, \n"
+"            __global uint* position) { \n"
+" \n"
+"  int global_index = get_global_id(0); \n"
+"  float accumulator = -10000000.0f; // Small number \n"
+"  uint pos = global_index; \n"
+"  // Loop sequentially over chunks of input vector \n"
+"  while (global_index < length) { \n"
+"    float element = buffer[global_index].x; \n"
+"    accumulator = (accumulator > element) ? accumulator : element; \n"
+"    pos = (accumulator > element) ? pos : global_index; \n"
+"    global_index += get_global_size(0); \n"
+"  } \n"
+" \n"
+"  // Perform parallel reduction \n"
+"  int local_index = get_local_id(0); \n"
+"  scratch[local_index] = accumulator; \n"
+"  scratchpos[local_index] = pos; \n"
+"  barrier(CLK_LOCAL_MEM_FENCE); \n"
+"  for(int offset = get_local_size(0) / 2; \n"
+"      offset > 0; \n"
+"      offset = offset / 2) { \n"
+"    if (local_index < offset) { \n"
+"      float other = scratch[local_index + offset]; \n"
+"      float mine = scratch[local_index]; \n"
+"      scratch[local_index] = (mine > other) ? mine : other; \n"
+"      scratchpos[local_index] = (mine > other) ? scratchpos[local_index] : scratchpos[local_index + offset]; \n"
+"    } \n"
+"    barrier(CLK_LOCAL_MEM_FENCE); \n"
+"  } \n"
+"  if (local_index == 0) { \n"
+"    result[get_group_id(0)] = scratch[0]; \n"
+"    position[get_group_id(0)] = scratchpos[0]; \n"
+"  } \n"
+"} \n"
+;
 
 const char* code_clJointHistogram2 = 
 "__kernel void clJointHistogram(__global const float* restrict ImageData1, __global const float* restrict ImageData2, __global uint* JointHistogram, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys) \n"
@@ -403,8 +443,8 @@ void Registration::BuildKernels()
 	cl_k_Q.SetCodeAndName(getQsource2,"clCalculateQ");
 	cl_k_Q.BuildKernel();
 
-
-
+	cl_k_MaxReduction.SetCodeAndName(code_clMaxReduction,"clMaxReduction");
+	cl_k_MaxReduction.BuildKernel();
 
 	cl_k_SumReduction.SetCodeAndName(sumReductionsource2,"clSumReduction");
 	cl_k_SumReduction.BuildKernel();
@@ -448,6 +488,16 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 {
 	// Build all the kernels required for series registration
 	BuildKernels();
+
+	// Setup the two memory objects for the MaxReduction Kernel Here....
+	// Warning sizes hardcoded in 2 places...
+	int ReductionGroups = 256;
+
+	ReductionResult = clCreateBuffer(clState::context,CL_MEM_READ_WRITE,ReductionGroups*sizeof(float),0,0);
+	ReductionPosition = clCreateBuffer(clState::context,CL_MEM_READ_WRITE,ReductionGroups*sizeof(cl_uint),0,0);
+
+	// Determine total reconstruction time
+	clock_t totalstart = clock();
 
 	int width = ROIpos.Width();
 	int height = ROIpos.Height();
@@ -523,6 +573,10 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			Window(clMem.clImage2,width,height);
 
 
+			//Start timer
+			clock_t begin = clock();
+
+
 			OpenCLFFT->Enqueue(clMem.clImage1,clMem.clFFTImage1,CLFFT_FORWARD);
 			OpenCLFFT->Enqueue(clMem.clImage2,clMem.clFFTImage2,CLFFT_FORWARD);
 
@@ -538,6 +592,12 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			
 			PhaseCompensatedPCF(numberoftrials,expecteddifference,dataOne,0,0,globalWorkSize);
 
+			//Stop timer
+			clFinish(clState::clq->cmdQueue);
+			clock_t end = clock();
+			double elapsed_millisecs = double(end - begin) * 1000 / CLOCKS_PER_SEC;
+
+			Debug("Alignment took "+Lex(elapsed_millisecs)+"ms");
 			// Add to list of registered images.
 			ImageList.push_back(currentimage);
 
@@ -550,8 +610,15 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			// Find out if it is necessary to pad the images.
 			DeterminePadding(ROIpos);
 			
+			clock_t start = clock();
 			// Add currently registered images to a reconstruction
 			AddToReconstruction(rotscaledseries,globalWorkSize,0,0,0);
+
+			clFinish(clState::clq->cmdQueue);
+			clock_t end = clock();
+			double elapsed_millisecs = double(end - start) * 1000 / CLOCKS_PER_SEC;
+
+			Debug("Reconstruction Took"+Lex(elapsed_millisecs)+"ms");
 
 
 			cl_k_Predicted.Enqueue(globalWorkSize);
@@ -732,6 +799,13 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	Reconstruction.SetDimensionScale(0,pixelscale);
 	Reconstruction.SetDimensionScale(1,pixelscale);
 	
+	clock_t totalend = clock();
+
+	double elapsed_millisecs = double(totalend - totalstart) * 1000 / CLOCKS_PER_SEC;
+
+	Debug("Total Reconstruction took "+Lex(elapsed_millisecs)+"ms");
+
+
 	// Cleanup
 	clMem.CleanUp(gotMTF&&gotNPS);
 	rotscaledseries.clear();
@@ -1086,10 +1160,20 @@ void Registration::AddToReconstruction(std::vector<float> &rotscaledseries, size
 		// Now add image to reconstruction - Make WTF - WTFminus			
 		float defocus = defocusshifts[ImageList[i]] + DfGuess;
 
-		for(int j = 0 ; j < fullwidth*fullheight ; j++)
+		// Unroll by 4
+		for(int j = 0 ; j < fullwidth*fullheight/4 ; j++)
 		{
-			image[j].s[0] = rotscaledseries[ImageList[i]*fullwidth*fullheight + j];
-			image[j].s[1] = 0;
+			image[4*j].s[0] = rotscaledseries[ImageList[i]*fullwidth*fullheight + 4*j];
+			image[4*j].s[1] = 0;
+
+			image[4*j+1].s[0] = rotscaledseries[ImageList[i]*fullwidth*fullheight + 4*j+1];
+			image[4*j+1].s[1] = 0;
+
+			image[4*j+2].s[0] = rotscaledseries[ImageList[i]*fullwidth*fullheight + 4*j+2];
+			image[4*j+2].s[1] = 0;
+
+			image[4*j+3].s[0] = rotscaledseries[ImageList[i]*fullwidth*fullheight + 4*j+3];
+			image[4*j+3].s[1] = 0;
 		}
 
 		clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&image[0],0,NULL,NULL);
@@ -1330,7 +1414,7 @@ void Registration::PhaseCompensatedPCF(int numberoftrials, float expectedDF, std
 		float maxHeight1;
 
 		// Translate linear array index into row and column.
-		PCPCFLib::GetShifts(xShift,yShift,subXShift,subYShift,maxHeight1,dataOne,width,height,options.maxdrift);
+		PCPCFLib::GetShiftsCL(xShift,yShift,subXShift,subYShift,maxHeight1,dataOne,clMem.clImage1,width,height,options.maxdrift,cl_k_MaxReduction,ReductionResult,ReductionPosition);
 
 		trialxshifts[trial] = preshiftx + xShift;
 		trialyshifts[trial] = preshifty+ yShift;

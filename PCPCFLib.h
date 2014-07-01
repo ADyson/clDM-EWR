@@ -32,6 +32,9 @@ public:
 	static void GetShifts(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight,
 				std::vector<std::complex<float>> &data, int sizeX, int sizeY, float maxshift);
 
+	static void GetShiftsCL(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight,
+				std::vector<std::complex<float>> &data,cl_mem &cldata, int sizeX, int sizeY, float maxshift, clKernel &clMaxReduction, cl_mem &result, cl_mem &position);
+
 	static void GetShiftsMI(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight,
 				float* data, int sizeX, int sizeY, float maxshift);
 		

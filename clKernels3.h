@@ -22,7 +22,7 @@ const char* pcpcfsource2 =
 ;
 
 const char* PadCropsource2 = 
-"__kernel void clPadCrop(__global const float2* Input, __global float2* Output, int fullwidth, int fullheight, int padLeft, int padRight, int padTop, int padBottom, float xShift, float yShift, int newwidth, int newheight, int iTop, int iLeft) \n"
+"__kernel void clPadCrop(__global const float2* restrict Input, __global float2* restrict Output, int fullwidth, int fullheight, int padLeft, int padRight, int padTop, int padBottom, float xShift, float yShift, int newwidth, int newheight, int iTop, int iLeft) \n"
 "{ \n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -51,7 +51,7 @@ const char* PadCropsource2 =
 ;
 
 const char* wavetransferfunctionsource2 = 
-"__kernel void clWaveTransferFunction(__global float2* clw, __global const float* CLxFrequencies, __global const float* CLyFrequencies, int sizeX, int sizeY, float wavelength, float beta, float delta, float A1r, float A1i, float C1, float C3, float objap)	\n"
+"__kernel void clWaveTransferFunction(__global float2* restrict clw, __global const float* restrict CLxFrequencies, __global const float* restrict CLyFrequencies, int sizeX, int sizeY, float wavelength, float beta, float delta, float A1r, float A1i, float C1, float C3, float objap)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -81,7 +81,7 @@ const char* wavetransferfunctionsource2 =
 ;
 
 const char* wavetransferfunctionminussource2 = 
-"__kernel void clWaveTransferFunctionMinus(__global float2* clw, __global const float* CLxFrequencies, __global const float* CLyFrequencies, int sizeX, int sizeY, float wavelength, float beta, float delta, float A1r, float A1i, float C1, float C3, float objap)	\n"
+"__kernel void clWaveTransferFunctionMinus(__global float2* restrict clw, __global const float* restrict CLxFrequencies, __global const float* restrict CLyFrequencies, int sizeX, int sizeY, float wavelength, float beta, float delta, float A1r, float A1i, float C1, float C3, float objap)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -112,7 +112,7 @@ const char* wavetransferfunctionminussource2 =
 
 
 const char* wavetransferfunctionmtfsource2 = 
-"__kernel void clWaveTransferFunctionMTF(__global float2* clw, __global const float* CLxFrequencies, __global const float* CLyFrequencies, int sizeX, int sizeY, \n"
+"__kernel void clWaveTransferFunctionMTF(__global float2* restrict clw, __global const float* restrict CLxFrequencies, __global const float* restrict CLyFrequencies, int sizeX, int sizeY, \n"
 " float wavelength, float beta, float delta, float A1r, float A1i, float C1, float C3, float objap, __global const float* clMTF, int mtflength, float scaleMTFx, float scaleMTFy)	\n"
 "{	\n"
 "	//Get the work items ID \n"
@@ -168,7 +168,7 @@ const char* wavetransferfunctionmtfsource2 =
 
 
 const char* wavetransferfunctionminusmtfsource2 = 
-"__kernel void clWaveTransferFunctionMinusMTF(__global float2* clw, __global float* CLxFrequencies, __global float* CLyFrequencies, int sizeX, int sizeY, float wavelength, float beta, float delta, float A1r, float A1i, float C1, float C3, float objap, __global float* clMTF, int mtflength, float scaleMTFx, float scaleMTFy)	\n"
+"__kernel void clWaveTransferFunctionMinusMTF(__global float2* restrict clw, __global const float* restrict CLxFrequencies, __global const float* restrict CLyFrequencies, int sizeX, int sizeY, float wavelength, float beta, float delta, float A1r, float A1i, float C1, float C3, float objap, __global float* clMTF, int mtflength, float scaleMTFx, float scaleMTFy)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -223,7 +223,7 @@ const char* wavetransferfunctionminusmtfsource2 =
 
 
 const char* wienerwsource2 = 
-"__kernel void clWienerW(__global float* clW, __global float2* clw, int sizeX, int sizeY, int init)	\n"
+"__kernel void clWienerW(__global float* restrict clW, __global const float2* restrict clw, int sizeX, int sizeY, int init)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -232,7 +232,7 @@ const char* wienerwsource2 =
 "	if(xid<sizeX&&yid<sizeY) \n"
 "	{	\n"
 "		int Index = xid + yid*sizeX; \n"
-"		float absw = sqrt(clw[Index].x*clw[Index].x + clw[Index].y*clw[Index].y);	\n"
+"		float absw = native_sqrt(clw[Index].x*clw[Index].x + clw[Index].y*clw[Index].y);	\n"
 "		if(init==1)	\n"
 "		{\n"
 "			clW[Index] = 0; \n" 
@@ -244,7 +244,7 @@ const char* wienerwsource2 =
 
 
 const char* wienervsource2 = 
-"__kernel void clWienerV(__global float2* clV, __global float2* clw, __global float2* clwminus, int sizeX, int sizeY, int init)	\n"
+"__kernel void clWienerV(__global float2* restrict clV, __global const float2* restrict clw, __global const float2* restrict clwminus, int sizeX, int sizeY, int init)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -268,7 +268,7 @@ const char* wienervsource2 =
 
 
 const char* wienertsource2 = 
-"__kernel void clWienerT(__global float2* clT, __global float2* clw, __global float2* fft, int sizeX, int sizeY, int init)	\n"
+"__kernel void clWienerT(__global float2* restrict clT, __global const float2* restrict clw, __global const float2* restrict fft, int sizeX, int sizeY, int init)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -293,7 +293,7 @@ const char* wienertsource2 =
 
 
 const char* wienerusource2 = 
-"__kernel void clWienerU(__global float2* clU, __global float2* clwminus, __global float2* fft, int sizeX, int sizeY, int init)	\n"
+"__kernel void clWienerU(__global float2* restrict clU, __global const float2* restrict clwminus, __global const float2* restrict fft, int sizeX, int sizeY, int init)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -317,7 +317,7 @@ const char* wienerusource2 =
 
 
 const char* makerestoredsource2 = 
-"__kernel void clMakeRestored(__global float* clW,__global float* clWminus, __global float2* clV,__global float2* clT, __global float2* clU, __global float2* clRestored, int sizeX, int sizeY,float snr)	\n"
+"__kernel void clMakeRestored(__global const float* restrict clW,__global const float* restrict clWminus, __global const float2* restrict clV,__global const float2* restrict clT, __global const float2* restrict clU, __global float2* restrict clRestored, int sizeX, int sizeY,float snr)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -336,29 +336,29 @@ const char* makerestoredsource2 =
 ;
 
 const char* makerestoredMTFNPSsource2 = 
-"__kernel void clMakeRestoredMTFNPS(__global float* clW,__global float* clWminus, __global float2* clV,__global float2* clT, __global float2* clU, __global float2* clRestored, int sizeX, int sizeY, __global float* clMTF, __global float* clNPS, int mtflength, float scaleMTFx, float scaleMTFy, float ps)	\n"
-"{											\n"
-"	//Get the work items ID					\n"
-"	int xid = get_global_id(0);				\n"
-"	int yid = get_global_id(1);				\n"
-"											\n"
-"	if(xid<sizeX&&yid<sizeY)				\n"
-"	{										\n"
-"		int Index = xid + yid*sizeX;		\n"
-"											\n"
-"		int xposmtf;						\n"
-"		int yposmtf;						\n"
-"											\n"
-"		if(xid < sizeX/2)					\n"
-"			xposmtf = xid;					\n"
-"		else								\n"
-"			xposmtf = (sizeX-xid);			\n"
-"											\n"
-"		if(yid < sizeY/2)					\n"
-"			yposmtf = yid;					\n"
-"		else								\n"
-"			yposmtf = sizeY-yid;			\n"
-"											\n"
+"__kernel void clMakeRestoredMTFNPS(__global const float* restrict clW,__global const float* restrict clWminus, __global const float2* restrict clV,__global const float2* restrict clT, __global const float2* restrict clU, __global float2* restrict clRestored, int sizeX, int sizeY, __global float* clMTF, __global float* clNPS, int mtflength, float scaleMTFx, float scaleMTFy, float ps)	\n"
+"{																														\n"
+"	//Get the work items ID																								\n"
+"	int xid = get_global_id(0);																							\n"
+"	int yid = get_global_id(1);																							\n"
+"																														\n"
+"	if(xid<sizeX&&yid<sizeY)																							\n"
+"	{																													\n"
+"		int Index = xid + yid*sizeX;																					\n"
+"																														\n"
+"		int xposmtf;																									\n"
+"		int yposmtf;																									\n"
+"																														\n"
+"		if(xid < sizeX/2)																								\n"
+"			xposmtf = xid;																								\n"
+"		else																											\n"
+"			xposmtf = (sizeX-xid);																						\n"
+"																														\n"
+"		if(yid < sizeY/2)																								\n"
+"			yposmtf = yid;																								\n"
+"		else																											\n"
+"			yposmtf = sizeY-yid;																						\n"
+"																														\n"
 "		float mtfposition = sqrt(scaleMTFy*yposmtf*scaleMTFy*yposmtf + scaleMTFx*xposmtf*scaleMTFx*xposmtf);			\n"
 "																														\n"
 "		int mtfpos = floor(sqrt(scaleMTFy*yposmtf*scaleMTFy*yposmtf + scaleMTFx*xposmtf*scaleMTFx*xposmtf));			\n"
@@ -385,7 +385,7 @@ const char* makerestoredMTFNPSsource2 =
 ;
 
 const char* getQsource2 = 
-"__kernel void clCalculateQ(__global float* clW, __global float* clWminus, __global float2* clV, __global float2* clQ, int sizeX, int sizeY, float snr)	\n"
+"__kernel void clCalculateQ(__global const float* restrict clW, __global const float* restrict clWminus, __global const float2* restrict clV, __global float2* clQ, int sizeX, int sizeY, float snr)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -405,7 +405,7 @@ const char* getQsource2 =
 ;
 
 const char* getQsource2NPS = 
-"__kernel void clCalculateQ(__global float* clW, __global float* clWminus, __global float2* clV, __global float2* clQ, int sizeX, int sizeY, float ps,__global float* clNPS, float scaleMTFx, float scaleMTFy, int mtflength)	\n"
+"__kernel void clCalculateQ(__global const float* restrict clW, __global const float* restrict clWminus, __global const float2* restrict clV, __global float2* clQ, int sizeX, int sizeY, float ps,__global float* clNPS, float scaleMTFx, float scaleMTFy, int mtflength)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -448,7 +448,7 @@ const char* getQsource2NPS =
 "}	\n";
 
 const char* minuswavefunctionsource2 = 
-"__kernel void clMinusWavefunction( __global float2* clFFT, __global float2* clFFTminus, int sizeX, int sizeY)	\n"
+"__kernel void clMinusWavefunction( __global float2* restrict clFFT, __global float2* restrict clFFTminus, int sizeX, int sizeY)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -468,7 +468,7 @@ const char* minuswavefunctionsource2 =
 ;
 
 const char* predictedsource = 
-"__kernel void clPredicted( __global float2* clFFT, __global float2* clPred, int sizeX, int sizeY)	\n"
+"__kernel void clPredicted( __global float2* restrict clFFT, __global float2* restrict clPred, int sizeX, int sizeY)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -490,9 +490,9 @@ const char* predictedsource =
 
 // Changed frequencies, were negative for some reason
 const char* getPCIsource2 = 
-"__kernel void clCalculatePCI(__global float2* clQ, __global float2* clFFT, __global float2* clFFTminus, \n"
-"__global float* CLxFrequencies, __global float* CLyFrequencies, __global float2* clPCI, __global float2* clPCIC, \n"
-" __global float2* clPCIM, __global float2* clPCIS, int sizeX, int sizeY, float C1, float C3, float A1r, float A1i, float wavelength, float objap)	\n"
+"__kernel void clCalculatePCI(__global const float2* restrict clQ, __global const float2* restrict clFFT, __global const float2* restrict clFFTminus, \n"
+"__global const float* restrict CLxFrequencies, __global const float* restrict CLyFrequencies, __global float2* restrict clPCI, __global float2* restrict clPCIC, \n"
+" __global float2* restrict clPCIM, __global float2* restrict clPCIS, int sizeX, int sizeY, float C1, float C3, float A1r, float A1i, float wavelength, float objap)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -501,22 +501,22 @@ const char* getPCIsource2 =
 "	if(xid<sizeX&&yid<sizeY) \n"
 "	{	\n"
 "		int Index = xid + yid*sizeX; \n"
-"		float freq = sqrt(CLxFrequencies[xid]*CLxFrequencies[xid] + CLyFrequencies[yid]*CLyFrequencies[yid]);	\n"
+"		float freq = native_sqrt(CLxFrequencies[xid]*CLxFrequencies[xid] + CLyFrequencies[yid]*CLyFrequencies[yid]);	\n"
 "		float kx = CLxFrequencies[xid];	\n"
 "		float ky = CLyFrequencies[yid];	\n"
-"		float gamma = ( .166666666 * 3.1415927f * wavelength ) * ( 6 * A1r * kx * kx + 6 * C1 * kx * kx - 6 * A1r * ky * ky	\n"
+"		float gamma = ( .166666666f * 3.1415927f * wavelength ) * ( 6 * A1r * kx * kx + 6 * C1 * kx * kx - 6 * A1r * ky * ky	\n"
 "				  + 6 * C1 * ky * ky + 3 * C3 * wavelength * wavelength * kx * kx * kx * kx + 6 * C3 * wavelength * wavelength * kx * kx * ky * ky	\n"
 "				  + 3 * C3 * wavelength * wavelength * ky * ky * ky * ky + 12 * A1i * kx * ky) ;	\n"
 "		float arg1 = atan2(clFFT[Index].y,clFFT[Index].x);					\n"
 "		float arg2 = atan2(clFFTminus[Index].y,clFFTminus[Index].x);		\n"
 "		float angle = atan2(ky,kx);										\n"
-"		clPCI[Index].x = (freq<=objap)*clQ[Index].x*-1 *cos(arg1+arg2+2*gamma); \n"
+"		clPCI[Index].x = (freq<=objap)*clQ[Index].x*-1 *native_cos(arg1+arg2+2*gamma); \n"
 "		clPCI[Index].y = 0; \n"
-"		clPCIC[Index].x = (freq<=objap)*clQ[Index].x*-1 *cos(arg1+arg2+2*gamma)*cos(2*angle); \n"
+"		clPCIC[Index].x = (freq<=objap)*clQ[Index].x*-1 *native_cos(arg1+arg2+2*gamma)*native_cos(2*angle); \n"
 "		clPCIC[Index].y = 0; \n"
-"		clPCIS[Index].x = (freq<=objap)*clQ[Index].x*-1 *cos(arg1+arg2+2*gamma)*sin(2*angle); \n"
+"		clPCIS[Index].x = (freq<=objap)*clQ[Index].x*-1 *native_cos(arg1+arg2+2*gamma)*native_sin(2*angle); \n"
 "		clPCIS[Index].y = 0; \n"
-"		clPCIM[Index].x = (freq<=objap)*(clPCI[Index].x + sqrt(clPCIC[Index].x * clPCIC[Index].x + clPCIS[Index].x * clPCIS[Index].x)); \n"
+"		clPCIM[Index].x = (freq<=objap)*(clPCI[Index].x + native_sqrt(clPCIC[Index].x * clPCIC[Index].x + clPCIS[Index].x * clPCIS[Index].x)); \n"
 "		clPCIM[Index].y = 0; \n"
 "	}\n"
 "}	\n"
@@ -524,7 +524,7 @@ const char* getPCIsource2 =
 
 
 const char* sumReductionsource2 = 
-"__kernel void clSumReduction(__global const float2* input, __global float2* output, const unsigned int size, __local float2* buffer)	\n"
+"__kernel void clSumReduction(__global const float2* restrict input, __global float2* restrict output, const unsigned int size, __local float2* buffer)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
 "	size_t idx = get_local_id(0);																										\n"
@@ -547,7 +547,7 @@ const char* sumReductionsource2 =
 ;
 
 const char* sumReductionsource3 = 
-"__kernel void clSumReductionFloat(__global const float* input, __global float* output, const unsigned int size, __local float* buffer, int offset)	\n"
+"__kernel void clSumReductionFloat(__global const float* restrict input, __global float* restrict output, const unsigned int size, __local float* buffer, int offset)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
 "	size_t idx = get_local_id(0);																										\n"
@@ -570,7 +570,7 @@ const char* sumReductionsource3 =
 ;
 
 const char* sumReductionsource4 = 
-"__kernel void clSumReductionUint(__global const uint* input, __global uint* output, const unsigned int size, __local uint* buffer, int offset)	\n"
+"__kernel void clSumReductionUint(__global const uint* restrict input, __global uint* restrict output, const unsigned int size, __local uint* buffer, int offset)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
 "	size_t idx = get_local_id(0);																										\n"
@@ -593,7 +593,7 @@ const char* sumReductionsource4 =
 ;
 
 const char* MaxReductionsource2 = 
-"__kernel void clMaxReduction(__global const float* input, __global float* output, const unsigned int size, __local float* buffer)	\n"
+"__kernel void clMaxReduction(__global const float* restrict input, __global float* restrict output, const unsigned int size, __local float* buffer)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
 "	size_t idx = get_local_id(0);																										\n"

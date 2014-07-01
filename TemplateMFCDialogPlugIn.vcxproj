@@ -95,8 +95,8 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOpt|x64'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\ProgramData\Gatan\DMSDK\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\ProgramData\Gatan\DMSDK\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\ProgramData\Gatan\DMSDK\include;C:\Program Files %28x86%29\AMD\clAmdBlas\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\ProgramData\Gatan\DMSDK\lib\x64;C:\Program Files %28x86%29\AMD\clAmdBlas\lib64\import;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;C:\Program Files\boost\boost_1_51;$(IncludePath)</IncludePath>

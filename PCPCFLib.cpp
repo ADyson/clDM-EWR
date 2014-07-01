@@ -345,6 +345,94 @@ void PCPCFLib::GetShifts(int &xShift, int &yShift, float &subXShift, float &subY
 	Debug("subx "+Lex(subXShift)+"\n");
 }
 
+void PCPCFLib::GetShiftsCL(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight, 
+						 std::vector<std::complex<float>> &data, cl_mem &cldata, int sizeX, int sizeY, float maxshift, clKernel &clMaxReduction, cl_mem &result, cl_mem &position)
+{
+	// Sometimes the highest value within the range set by maxshift is still negative...
+	maxheight = -FLT_MAX;
+	int maxPosition1 = 0;
+
+	// Need to set memory and workgroup sizes sensibly for this kernel...
+
+	int length = sizeX*sizeY;
+
+	int ReductionGroups =  256;
+
+	size_t* WorkSize = new size_t[3];
+	WorkSize[0] = ReductionGroups*256;
+	WorkSize[1] = 1;
+	WorkSize[2] = 1;
+	
+	size_t* LocalSize = new size_t[3];
+	LocalSize[0] = 256;
+	LocalSize[1] = 1;
+	LocalSize[2] = 1;
+
+
+	clMaxReduction.SetArgT(0,cldata);
+	clMaxReduction.SetArgLocalMemory(1,256,clFloat);
+	clMaxReduction.SetArgLocalMemory(2,256,clUInt);
+	clMaxReduction.SetArgT(3,length);
+	clMaxReduction.SetArgT(4,result);
+	clMaxReduction.SetArgT(5,position);
+
+	clMaxReduction.Enqueue3D(WorkSize,LocalSize);
+
+	// Now read back 256 maxs and there offsets and find best one.
+	std::vector<float> hostres(ReductionGroups);
+	std::vector<cl_uint> hostpos(ReductionGroups);
+
+	clEnqueueReadBuffer( clState::clq->cmdQueue, result, CL_FALSE, 0, ReductionGroups*sizeof(float) , &hostres[0], 0, NULL, NULL );
+	clEnqueueReadBuffer( clState::clq->cmdQueue, position, CL_TRUE, 0, ReductionGroups*sizeof(unsigned int) , &hostpos[0], 0, NULL, NULL );
+	
+	// Find out which numbers to read back
+	float res = -1000000.0f;
+	cl_uint pos = 0;
+
+	for(int i = 0 ; i < ReductionGroups; i++)
+	{
+		if(hostres[i] > res)
+		{
+			res = hostres[i];
+			pos = hostpos[i];
+
+			//Debug(Lex(res));
+			//Debug(Lex(pos));
+		}
+	}
+
+	maxPosition1 = pos;
+
+	// Translate linear array index into row and column.
+	int maxindexr = floor(float((maxPosition1)/(sizeX)))+1;
+	int maxindexc = maxPosition1 + 1 - sizeX*floor(float((maxPosition1)/(sizeX)));
+
+
+	// Shift is positive or negative depending on image quadrant it appears in.
+	if(maxindexr > floor(sizeY/2 +.5))
+		yShift = maxindexr - (sizeY) -1;
+	else
+		yShift = maxindexr - 1;
+
+	if(maxindexc > floor(sizeX/2 +.5))
+		xShift = maxindexc - (sizeX) -1;
+	else
+		xShift = maxindexc - 1;
+				
+	// Construct 5*5 region around max to do peakfit (sortof). Probably just CoM. Can do vertex thing also
+	//float* peak = new float[25];
+	//GetPeak(peak,maxindexc,maxindexr,sizeX,sizeY, data, subXShift, subYShift);
+	//delete[] peak;
+
+	//Utility::SetResultWindow(boost::lexical_cast<std::string>(xShift)+"\n");
+	//Utility::SetResultWindow(boost::lexical_cast<std::string>(yShift)+"\n");
+
+	// Parabola Vertex Mode
+	PCPCFLib::FindVertexParabola(maxPosition1,sizeX,sizeY, data, subXShift, subYShift, maxheight);
+
+	//Debug("subx "+Lex(subXShift)+"\n");
+}
+
 void PCPCFLib::GetShiftsMI(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight, 
 						 float* data, int sizeX, int sizeY, float maxshift)
 {

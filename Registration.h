@@ -102,6 +102,10 @@ public:
 	Registration(void);
 	~Registration(void);
 
+	cl_mem ReductionResult;
+	cl_mem ReductionPosition;
+
+
 	bool noalign;
 	// Vector to hold IDs of registered images as they are completed.
 	std::vector<int> ImageList;
@@ -139,6 +143,7 @@ public:
 	clKernel cl_k_MakeRestoredMTFNPS;
 	clKernel cl_k_HanningWindow;
 	clKernel cl_k_Predicted;
+	clKernel cl_k_MaxReduction;
 
 	void KernelCleanUp();
 
