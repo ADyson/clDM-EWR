@@ -1,5 +1,5 @@
 const char* pcpcfsource2 = 
-"__kernel void clPCPCF(__global const float2* fft1, __global const float2* fft2, __global float2* fftresult, __global const float* CLxFrequencies, __global const float* CLyFrequencies, int sizeX, int sizeY, float focalstep, float wavelength, float pcpcfkmax) \n"
+"__kernel void clPCPCF(__global const float2* restrict fft1, __global const float2* restrict fft2, __global float2* restrict fftresult, __global const float* CLxFrequencies, __global const float* CLyFrequencies, int sizeX, int sizeY, float focalstep, float wavelength, float pcpcfkmax) \n"
 "{		\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"

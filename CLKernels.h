@@ -191,7 +191,7 @@ const char* DiffMatchSourceOrig =
 ;
 
 const char* DiffMatchSource = 
-"__kernel void clDiffMatch(__global const float* quadrantData, __global float* result, __local float* localQuadrant, int quadrant, int width, int height, int depth, int quadrantwidth, int quadrantheight, float dfstart, \n"
+"__kernel void clDiffMatch(__global const float* restrict quadrantData, __global float* restrict result, __local float* restrict localQuadrant, int quadrant, int width, int height, int depth, int quadrantwidth, int quadrantheight, float dfstart, \n"
 " float dfstep, float astigxstart, float astigxstep, float astigystart, float astigystep, float pixelscale, float wavelength, float Cs, float noincluderegion) \n"
 "{ \n"
 "	int xid = get_global_id(0);	\n"
@@ -212,7 +212,7 @@ const char* DiffMatchSource =
 "	float defocus = dfstart + xid*dfstep; \n"
 "	float astigx = astigxstart + yid*astigxstep; \n"
 "	float astigy = astigystart + zid*astigystep; \n"
-"	float astigma = sqrt(astigx*astigx + astigy*astigy); \n"
+"	float astigma = native_sqrt(astigx*astigx + astigy*astigy); \n"
 "	float astigaxis = atan2(astigy+0.000001f,astigx+0.000001f); \n"
 "	float s1 = 0.0f; \n"
 "	float s2 = 0.0f; \n"
@@ -230,8 +230,8 @@ const char* DiffMatchSource =
 "			{ \n"
 "				if(localQuadrant[(i-1)+quadrantwidth*(j-1)]*localQuadrant[(i-1)+quadrantwidth*(j-1)]!=0) \n"
 "				{ \n"
-"					float k = sqrt((quadrantwidth-i)*(quadrantwidth-i)*pixelscale*pixelscale + (quadrantheight-j)*(quadrantwidth-j)*pixelscale*pixelscale); \n"
-"					float val = -sin(2*3.1415926f*((wavelength/2.0f)*defocus*k*k + (wavelength/2.0f)*astigma*k*k*cos(2.0f*(atan2(quadj*(quadrantheight+0.001f - j), quadi*(quadrantwidth+0.001f - i)) - astigaxis)) + ((wavelength*wavelength*wavelength)/4)*Cs*k*k*k*k)); \n"
+"					float k = native_sqrt((quadrantwidth-i)*(quadrantwidth-i)*pixelscale*pixelscale + (quadrantheight-j)*(quadrantwidth-j)*pixelscale*pixelscale); \n"
+"					float val = -native_sin(2*3.1415926f*((wavelength/2.0f)*defocus*k*k + (wavelength/2.0f)*astigma*k*k*cos(2.0f*(atan2(quadj*(quadrantheight+0.001f - j), quadi*(quadrantwidth+0.001f - i)) - astigaxis)) + ((wavelength*wavelength*wavelength)/4)*Cs*k*k*k*k)); \n"
 "					float val2 = val*val; \n"
 "					s1 += (val2 * localQuadrant[(i-1)+quadrantwidth*(j-1)]); \n"
 "					s2 +=  val2*val2; \n"
@@ -240,7 +240,7 @@ const char* DiffMatchSource =
 "			} \n"
 "		} \n"
 "	\n"
-"	result[xid + yid * width + zid * width * height] = s1/sqrt(s2*s3); \n"		
+"	result[xid + yid * width + zid * width * height] = native_divide(s1,native_sqrt(s2*s3)); \n"		
 "} \n"
 ;
 
@@ -262,7 +262,7 @@ const char* RadialFilterSource =
 ;
 
 const char* DiffMatchSource2 = 
-"__kernel void clDiffMatch2(__global const float* quadrantData, __global float* result, __local float* localQuadrant, int width, int height, int quadrantwidth, int quadrantheight, float dfstart, \n"
+"__kernel void clDiffMatch2(__global const float* restrict quadrantData, __global float* restrict result, __local float* restrict localQuadrant, int width, int height, int quadrantwidth, int quadrantheight, float dfstart, \n"
 " float dfstep, float astigstart, float astigstep, float pixelscale, float wavelength, float Cs, float noincluderegion) \n"
 "{ \n"
 "	int xid = get_global_id(0);	\n"

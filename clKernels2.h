@@ -1,5 +1,5 @@
 const char* pcpcfSource = 
-"__kernel void clPCPCF(__global const float2* fft1, __global const float2* fft2, __global float2* fftresult, __global const float* CLxFrequencies, __global const float* CLyFrequencies, int sizeX, int sizeY, float focalstep, float wavelength, float pcpcfkmax) \n"
+"__kernel void clPCPCF(__global const float2* restrict fft1, __global const float2* restrict fft2, __global float2* restrict fftresult, __global const float* restrict CLxFrequencies, __global const float* restrict CLyFrequencies, int sizeX, int sizeY, float focalstep, float wavelength, float pcpcfkmax) \n"
 "{		\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -425,9 +425,9 @@ const char* minuswavefunctionsource =
 ;
 
 const char* getPCIsource = 
-"__kernel void clCalculatePCI(__global float2* clQ, __global float2* clFFT, __global float2* clFFTminus, \n"
-"__global float* CLxFrequencies, __global float* CLyFrequencies, __global float2* clPCI, __global float2* clPCIC, \n"
-" __global float2* clPCIM, __global float2* clPCIS, int sizeX, int sizeY, float C1, float C3, float A1r, float A1i, float wavelength, float objap)	\n"
+"__kernel void clCalculatePCI(__global const float2* restrict clQ, __global const float2* restrict clFFT, __global const float2* restrict clFFTminus, \n"
+"__global const float* restrict CLxFrequencies, __global const float* restrict CLyFrequencies, __global float2* restrict clPCI, __global float2* restrict clPCIC, \n"
+" __global float2* restrict clPCIM, __global float2* restrict clPCIS, int sizeX, int sizeY, float C1, float C3, float A1r, float A1i, float wavelength, float objap)	\n"
 "{	\n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -459,7 +459,7 @@ const char* getPCIsource =
 
 
 const char* sumReductionsource = 
-"__kernel void clSumReduction(__global const float2* input, __global float2* output, const unsigned int size, __local float2* buffer)	\n"
+"__kernel void clSumReduction(__global const float2* restrict input, __global float2* restrict output, const unsigned int size, __local float2* restrict buffer)	\n"
 "{																																		\n"
 "	//Get the work items ID																												\n"
 "	size_t idx = get_local_id(0);																										\n"

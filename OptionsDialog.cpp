@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "OptionsDialog.h"
-#include "afxdialogex.h"
+//#include "afxdialogex.h"
 #include "FTSR.h"
 
 

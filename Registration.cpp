@@ -66,7 +66,7 @@ const char* code_clRSize =
 
 
 const char* code_clEntropy = 
-"__kernel void clEntropy(__global const uint* JH, __global float* Entropy, int histo, float size) \n"
+"__kernel void clEntropy(__global const uint* restrict JH, __global float* restrict Entropy, int histo, float size) \n"
 "{ \n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"
@@ -86,7 +86,7 @@ const char* code_clEntropy =
 // 400 Joint histograms at once like a badass kernel...
 // So Parallel, Much Histogram, Very GPU, WOW
 const char* code_clJointHistogramMULTIFix =
-"__kernel void clJointHistogramMULTI(__global const float* ImageData1, __global const float* ImageData2, __global int* JointHistograms, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys,  __local int* tmp_histogram2) \n"
+"__kernel void clJointHistogramMULTI(__global const float* restrict ImageData1, __global const float* restrict ImageData2, __global int* restrict JointHistograms, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys,  __local int* restrict tmp_histogram2) \n"
 "{ \n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"

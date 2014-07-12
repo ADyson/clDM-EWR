@@ -97,7 +97,7 @@ const char* code_clLogPolar =
 "} \n"
 ;
 const char* code_clJointHistogram = 
-"__kernel void clJointHistogram(__global const float* ImageData1, __global const float* ImageData2, __global uint* JointHistogram, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys) \n"
+"__kernel void clJointHistogram(__global const float* restrict ImageData1, __global const float* restrict ImageData2, __global uint* restrict JointHistogram, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys) \n"
 "{ \n"
 "	//Get the work items ID \n"
 "	int xid = get_global_id(0);	\n"

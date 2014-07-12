@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "ManualAlignment.h"
-#include "afxdialogex.h"
+//#include "afxdialogex.h"
 #include "Utility.h"
 
 
