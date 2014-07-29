@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "SearchDialog.h"
-#include "afxdialogex.h"
 #include "DMScriptFunctions.h"
 #include "Utility.h"
 #include "boost\lexical_cast.hpp"

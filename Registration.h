@@ -145,6 +145,11 @@ public:
 	clKernel cl_k_HanningWindow;
 	clKernel cl_k_Predicted;
 	clKernel cl_k_MaxReduction;
+	clKernel cl_k_JointHistogram;
+	clKernel cl_k_JointHistogramComplex;
+	clKernel cl_k_RSize;
+	clKernel cl_k_Entropy;
+
 
 	void KernelCleanUp();
 
@@ -179,6 +184,7 @@ public:
 	void PhaseCompensatedPCF(int numberoftrials, float expectedDF, std::vector<std::complex<float>> &dataOne, int preshiftx, int preshifty, size_t* globalWorkSize);
 	void MutualInformation(int numberoftrials, float expectedDF, std::vector<std::complex<float>> &dataOne, std::vector<std::complex<float>> &dataTwo, int preshiftx, int preshifty, size_t* globalWorkSize, int miSize, DigitalMicrograph::Image &MIMap, int imagenumber);
 	void MutualInformationFast(int numberoftrials, float expectedDF, std::vector<std::complex<float>> &dataOne, std::vector<std::complex<float>> &dataTwo, int preshiftx, int preshifty, size_t* globalWorkSize, int miSize, DigitalMicrograph::Image &MIMap, int imagenumber);
+	void MutualInformationFaster(int numberoftrials, float expectedDF,cl_mem &ImageOne,cl_mem &ImageTwo ,int preshiftx, int preshifty, size_t* globalWorkSize, int miSize, DigitalMicrograph::Image &MIMap, int imagenumber);
 	void AddToReconstruction(std::vector<float> &rotscaledseries, size_t* globalWorkSize, float DfGuess, float A1rGuess, float A1iGuess);
 	void MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries, size_t* globalWorkSize);
 	void SetupPCI(size_t* globalWorkSize);

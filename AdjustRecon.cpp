@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "AdjustRecon.h"
-#include "afxdialogex.h"
 #include "FTSR.h"
 #include "boost\lexical_cast.hpp"
 #include "Utility.h"

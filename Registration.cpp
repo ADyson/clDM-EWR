@@ -176,6 +176,57 @@ const char* code_clJointHistogramMULTIFix =
 " } \n"
 ;
 
+const char* code_clJointHistogramMULTIComplex =
+"__kernel void clJointHistogramMULTI(__global const float2* restrict ImageData1, __global const float2* restrict ImageData2, __global int* restrict JointHistograms, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys,  __local int* restrict tmp_histogram2) \n"
+"{ \n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0);	\n"
+"	int yid = get_global_id(1); \n"
+" // Read bin values into appropriate part of shared memory in parallel \n"
+"	for( int lidx =  get_local_id(0); lidx < (get_local_size(0)+19); lidx += get_local_size(0)) \n"
+"		for( int lidy =  get_local_id(1); lidy < (get_local_size(1)+19); lidy += get_local_size(1)) \n"
+"		{ \n"
+"			int xp = lidx + get_group_id(0)*get_local_size(0) + xs; \n"
+"			int yp = lidy + get_group_id(1)*get_local_size(1) + ys; \n"
+"			//int x2 = lidx + get_group_id(0)*get_local_size(0); \n"
+"			//int y2 = lidy + get_group_id(1)*get_local_size(1); \n"
+"			if(xp>=sizeX) \n"
+"				xp-=sizeX; \n"
+"			if(yp>=sizeY) \n"
+"				yp-=sizeY; \n"
+"			if(xp<0) \n"
+"				xp+=sizeX; \n"
+"			if(yp<0) \n"
+"				yp+=sizeY; \n"
+"			//if(x2>=sizeX) // Technically I shouldnt have to wrap these because I dont need to calculate the values of B1 outside normal area but this is easier? \n"
+"			//	x2-=sizeX; \n"
+"			//if(y2>=sizeY) \n"
+"			//	y2-=sizeY; \n"
+"			//Want normal B1s from first image, but the second image should also take into account the xs and ys so we can the full range in multiple kernel launches \n"
+"			//tmp_histogram[lidx + (get_local_size(0)+19)*lidy] = floor((ImageData1[x2 + sizeX * y2].x - min)/(max-min) * 255.0f); \n"
+"			tmp_histogram2[lidx + (get_local_size(0)+19)*lidy] = floor((ImageData2[xp + sizeX * yp].x - min2)/(max2-min2) * 255.0f); \n"
+"		} \n"
+"	barrier(CLK_LOCAL_MEM_FENCE);\n"
+"	int b1 = floor((ImageData1[xid + sizeX * yid].x - min)/(max-min) * 255.0f); \n"
+"	if(b1>255) \n"
+"		b1=255; \n"
+"	if(b1<0) \n"
+"		b1=0; \n"
+" 	// At this point have a shared memory full of B1 and B2 values to make a 20*20 set of Joint Histograms for every pixel in this workgroup \n"
+"	for( int xx = 0; xx < 20; xx++) \n"
+"		for( int yy = 0; yy < 20; yy++) \n"
+"		{ \n"
+"			int histo = xx + 20*yy; \n"
+"			int b2 = tmp_histogram2[get_local_id(0) + xx + (get_local_id(1) + yy)*(get_local_size(0)+19)]; \n"
+"			if(b2>255) \n"
+"				b2=255; \n"
+"			if(b2<0) \n"
+"				b2=0; \n"
+"			atomic_inc(&JointHistograms[(histo*256*256) + b1 + (256 * b2)]); \n"
+"		} \n"
+" } \n"
+;
+
 // 400 Joint histograms at once like a badass kernel...
 // So Parallel, Much Histogram, Very GPU, WOW
 const char* code_clJointHistogramMULTI =
@@ -286,7 +337,62 @@ const char* code_clJointHistogramMULTITest =
 " } \n"
 ;
 
-
+const char* code_clSingleAndJointHistogramMulti =
+"__kernel void clJointHistogramMULTI(__global const float* ImageData1, __global const float* ImageData2, __global uint* JointHistograms,__global uint* HistogramA,__global uint* HistogramB, int sizeX, int sizeY, float max, float min, float max2, float min2, int xs, int ys) \n"
+"{ \n"
+"	//Get the work items ID \n"
+"	int xid = get_global_id(0);	\n"
+"	int yid = get_global_id(1); \n"
+"   __local uint  tmp_histogram[(32+9)*(8+9)];\n"
+"   __local uint  tmp_histogram2[(32+9)*(8+9)];\n"
+" // Read bin values into appropriate part of shared memory in parallel \n"
+"	for( int lidx =  get_local_id(0); lidx < (32+9); lidx += get_local_size(0)) \n"
+"		for( int lidy =  get_local_id(1); lidy < (8+9); lidy += get_local_size(1)) \n"
+"		{ \n"
+"			int xp = lidx + get_group_id(0)*get_local_size(0) + xs; \n"
+"			int yp = lidy + get_group_id(1)*get_local_size(1) + ys; \n"
+"			int x2 = lidx + get_group_id(0)*get_local_size(0); \n"
+"			int y2 = lidy + get_group_id(1)*get_local_size(1); \n"
+"			if(xp>=sizeX) \n"
+"				xp-=sizeX; \n"
+"			if(yp>=sizeY) \n"
+"				yp-=sizeY; \n"
+"			if(xp<0) \n"
+"				xp+=sizeX; \n"
+"			if(yp<0) \n"
+"				yp+=sizeY; \n"
+"			if(x2>=sizeX) // Technically I shouldnt have to wrap these because I dont need to calculate the values of B1 outside normal area but this is easier? \n"
+"				x2-=sizeX; \n"
+"			if(y2>=sizeY) \n"
+"				y2-=sizeY; \n"
+"			//Want normal B1s from first image, but the second image should also take into account the xs and ys so we can the full range in multiple kernel launches \n"
+"			tmp_histogram[lidx + (32+9)*lidy] = floor((ImageData1[x2 + sizeX * y2] - min)/(max-min) * 255.0f); \n"
+"			tmp_histogram2[lidx + (32+9)*lidy] = floor((ImageData2[xp + sizeX * yp] - min2)/(max2-min2) * 255.0f); \n"
+"			//tmp_histogram[lidx + (32+9)*lidy] = 1; \n"
+"			//tmp_histogram2[lidx + (32+9)*lidy] = 1; \n"
+"		} \n"
+"  barrier(CLK_LOCAL_MEM_FENCE);\n"
+" // At this point have a shared memory full of B1 and B2 values to make a 20*20 set of Joint Histograms for every pixel in this workgroup \n"
+"	for( int xx = 0; xx < 10; xx++) \n"
+"		for( int yy = 0; yy < 10; yy++) \n"
+"		{ \n"
+"			int histo = xx + 10*yy; \n"
+"			uint b1 = tmp_histogram[get_local_id(0) + get_local_id(1) * (32+9)]; \n"
+"			uint b2 = tmp_histogram2[get_local_id(0) + xx + (get_local_id(1) + yy)*(32+9)]; \n"
+"			if(b1>255) \n"
+"				b1=255; \n"
+"			if(b2>255) \n"
+"				b2=255; \n"
+"			if(b1<0) \n"
+"				b1=0; \n"
+"			if(b2<0) \n"
+"				b2=0; \n"
+"			atomic_inc(&JointHistograms[(histo*256*256) + b1 + (256 * b2)]); \n"
+"			atomic_inc(&HistogramA[(histo*256*256) + b1 + (256 * b2)]); \n"
+"			atomic_inc(&HistogramB[(histo*256*256) + b1 + (256 * b2)]); \n"
+"		} \n"
+" } \n"
+;
 
 const char* code_clPartialHistogram2 = 
 "__kernel void clPartialHistogram(__global const float* img, __global uint *histogram, int sizeX, int sizeY) \n"
@@ -364,7 +470,6 @@ Registration::Registration(void)
 	gotMTF = false;
 	gotNPS = false;
 }
-
 
 Registration::~Registration(void)
 {
@@ -482,8 +587,26 @@ void Registration::BuildKernels()
 		cl_k_Q2.BuildKernel();
 	}
 
+
+	// Build Histogram Kernels..
+	//cl_k_Histogram.SetCodeAndName(code_clPartialHistogram2,"");
+
+	cl_k_JointHistogram.SetCodeAndName(code_clJointHistogramMULTIFix,"clJointHistogramMULTI");
+	cl_k_JointHistogram.BuildKernel();
+	
+	cl_k_JointHistogramComplex.SetCodeAndName(code_clJointHistogramMULTIComplex,"clJointHistogramMULTI");
+	cl_k_JointHistogramComplex.BuildKernel();
+
+	cl_k_RSize.SetCodeAndName(code_clRSize,"clRSize");
+	cl_k_RSize.BuildKernel();
+	
+	cl_k_Entropy.SetCodeAndName(code_clEntropy,"clEntropy");
+	cl_k_Entropy.BuildKernel();
+
 }
 
+// Seems to be an issue with selecting an ROI the same size as the entire image.
+// Also crashing when ran twice in one session (memory problem - not there before optimisation)
 void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem &clxFrequencies, cl_mem &clyFrequencies)
 {
 	// Build all the kernels required for series registration
@@ -522,11 +645,12 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	// Make a new rotation aligned stack based on the expected defocus step.
 	//std::vector<float> rotscaledseries(fullwidth*fullheight*NumberOfImages);
 
-	//Not needed now
+	//Not needed now - pass around to save making too many changes
 	std::vector<float> rotscaledseries;
 
 	// Make new series of rotated and scaled data or just copy data if no rotation magnification is required.
 	RotationScale(seriesdata,fullWorkSize,rotscaledseries);
+	// After this line all the images are stored in fullimages[0->N-1]
 
 	// Store each of the two images in correlation
 	std::vector< std::complex< float > > dataOne( width*height );
@@ -548,14 +672,13 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	// Loop over all images to perform registration
 	for(int n = 0; n < NumberOfImages - 1; n++)
 	{
-		if(n < 2)
+		if(n < 2) // Different behaviour for first two images
 		{
 			// Set Current Image to next image to register.
 			IterateImageNumber();
 			DeterminePadding(ROIpos);
 
 			float zero = 0;
-
 			cl_k_PadCrop.SetArgT(4,padLeft);
 			cl_k_PadCrop.SetArgT(5,padRight);
 			cl_k_PadCrop.SetArgT(6,padTop);
@@ -579,6 +702,10 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			cl_k_PadCrop.SetArgT(0,fullimages[currentimage]);
 			cl_k_PadCrop.SetArgT(1,clMem.clImage2);
 			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			// If the ROI takes up the entire region of the image, could be a promble??
+			// Enforce a padding of at least one on right and bottom in this case????
+
 
 			// Reset arguments to defaults
 			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
@@ -857,6 +984,8 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	
 	clReleaseMemObject(ReductionResult);
 	clReleaseMemObject(ReductionPosition);
+
+	fullimages.clear();
 }
 
 void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem &clxFrequencies, cl_mem &clyFrequencies)
@@ -894,7 +1023,10 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 	SetFixedArgs(ROIpos,clxFrequencies,clyFrequencies,wavelength);
 
 	// Make a new rotation aligned stack based on the expected defocus step.
-	std::vector<float> rotscaledseries(fullwidth*fullheight*NumberOfImages);
+	//std::vector<float> rotscaledseries(fullwidth*fullheight*NumberOfImages);
+
+	//Not needed now - pass around to save making too many changes
+	std::vector<float> rotscaledseries;
 
 	// Make new series of rotated and scaled data or just copy data if no rotation magnification is required.
 	RotationScale(seriesdata,fullWorkSize,rotscaledseries);
@@ -922,13 +1054,41 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 	{
 		if(n < 2)
 		{
-			// Set Current Image to next image to register.
 			IterateImageNumber();
+			DeterminePadding(ROIpos);
+
+			float zero = 0;
+			cl_k_PadCrop.SetArgT(4,padLeft);
+			cl_k_PadCrop.SetArgT(5,padRight);
+			cl_k_PadCrop.SetArgT(6,padTop);
+			cl_k_PadCrop.SetArgT(7,padBottom);
+			cl_k_PadCrop.SetArgT(8,zero);
+			cl_k_PadCrop.SetArgT(9,zero);
+
 			// Work out what focus difference is expected between these 2 images.
 
 			// Images should start at most underfocus
 			// Positive focus difference if imagetwo > imageone
 			float expecteddifference = CalculateExpectedDF(imageone,currentimage);
+
+			//CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
+			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
+
+			cl_k_PadCrop.SetArgT(0,fullimages[imageone]);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
+			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			cl_k_PadCrop.SetArgT(0,fullimages[currentimage]);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage2);
+			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			// If the ROI takes up the entire region of the image, could be a promble??
+			// Enforce a padding of at least one on right and bottom in this case????
+
+
+			// Reset arguments to defaults
+			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
 
 			if(options.knownfocus)
 			{
@@ -938,8 +1098,8 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 					expecteddifference = sgn(currentimage-imageone) * options.focuslist[currentimage];
 			}
 
-			CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
-			CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
+			//CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
+			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
 		
 			// Get number of trial steps
 			// Assume one if it is not specified
@@ -948,7 +1108,7 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 
 			// with regards to passing the image number to specify what location to put the map. there are N-1 different maps, first image is 0, last image is 19..
 			// If image number is less than reference pass image number, if its greater than reference pass image number -1....
-			MutualInformationFast(numberoftrials,expecteddifference,dataOne,dataTwo,0,0,globalWorkSize,miSize,MIMap,(currentimage > referenceimage) ? currentimage-1 : currentimage );
+			MutualInformationFaster(numberoftrials,expecteddifference,clMem.clImage1,clMem.clImage2,0,0,globalWorkSize,miSize,MIMap,(currentimage > referenceimage) ? currentimage-1 : currentimage );
 
 			// Add to list of registered images.
 			ImageList.push_back(currentimage);
@@ -1047,10 +1207,28 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 			// Don't need to check reconstructed images..
 			//Utility::PrintCLMemToImage(clMem.clRestored,"restored"+Lex(n),width,height,clFloat2,clState::clq);
 
-			clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.clRestored,CL_TRUE,0,width*height*sizeof(std::complex<float>),&dataOne[0],0,0,0);
+			//clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.clRestored,CL_TRUE,0,width*height*sizeof(std::complex<float>),&dataOne[0],0,0,0);
 
 			//CopyImageData(otherimage,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,preshiftx,preshifty);
-			CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,preshiftx,preshifty);
+
+			float presx = preshiftx;
+			float presy = preshifty;
+
+			cl_k_PadCrop.SetArgT(4,padLeft);
+			cl_k_PadCrop.SetArgT(5,padRight);
+			cl_k_PadCrop.SetArgT(6,padTop);
+			cl_k_PadCrop.SetArgT(7,padBottom);
+			cl_k_PadCrop.SetArgT(8,presx);
+			cl_k_PadCrop.SetArgT(9,presy);
+
+			cl_k_PadCrop.SetArgT(0,fullimages[currentimage]);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage2);
+			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			// Reset arguments to defaults
+			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
+			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
+
 		
 			// Get number of trial steps
 			// Assume one if it is not specified
@@ -1059,7 +1237,7 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 			Debug("About to MI with reconstructed");
 			// with regards to passing the image number to specify what location to put the map. there are N-1 different maps, first image is 0, last image is 19..
 			// If image number is less than reference pass image number, if its greater than reference pass image number -1....
-			MutualInformationFast(numberoftrials,expecteddifference,dataOne,dataTwo,preshiftx,preshifty,globalWorkSize,miSize,MIMap,(currentimage > referenceimage) ? currentimage-1 : currentimage);
+			MutualInformationFaster(numberoftrials,expecteddifference,clMem.clRestored,clMem.clImage2,preshiftx,preshifty,globalWorkSize,miSize,MIMap,(currentimage > referenceimage) ? currentimage-1 : currentimage);
 
 			Debug("MI finished");
 
@@ -1164,6 +1342,14 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 	clMem.CleanUp(gotMTF&&gotNPS);
 	rotscaledseries.clear();
 	KernelCleanUp();
+
+	
+	for(int i = 0; i < fullimages.size(); i++)
+	{
+		clReleaseMemObject(fullimages[i]);
+	}
+
+	fullimages.clear();
 }
 
 void Registration::AddToReconstruction(std::vector<float> &rotscaledseries, size_t* globalWorkSize, float DfGuess, float A1rGuess, float A1iGuess)
@@ -1780,21 +1966,6 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 		}
 	}
 
-	clKernel cl_k_JointHistogram;
-	clKernel cl_k_RSize;
-	clKernel cl_k_Entropy;
-
-	// Build Histogram Kernels..
-	cl_k_JointHistogram.SetCodeAndName(code_clJointHistogramMULTIFix,"clJointHistogramMULTI");
-	cl_k_JointHistogram.BuildKernel();
-
-	cl_k_RSize.SetCodeAndName(code_clRSize,"clRSize");
-	cl_k_RSize.BuildKernel();
-	
-	cl_k_Entropy.SetCodeAndName(code_clEntropy,"clEntropy");
-	cl_k_Entropy.BuildKernel();
-
-
 	// Calculate work group sizes
 	size_t* globalWorkSize = new size_t[3];
 	globalWorkSize[0] = width;
@@ -1972,9 +2143,6 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 						}
 			}
 
-
-
-
 		clReleaseMemObject(clImage1);
 		clReleaseMemObject(clImage2);
 		clReleaseMemObject(clJH);
@@ -2003,6 +2171,267 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 
 		MIMap.GetImageDisplay(0).SetDisplayedLayers(imagenumber,imagenumber);
 }
+
+void Registration::MutualInformationFaster(int numberoftrials, float expectedDF, cl_mem &ImageOne, cl_mem &ImageTwo, int preshiftx, int preshifty, size_t* globalWorkSize, int miSize, DigitalMicrograph::Image &MIMap, int imagenumber)
+{
+
+	float averagexshift =0;
+	float averageyshift =0;
+
+	// Ignores first image with shift zero always
+	for(int i = 1; i < ImageList.size(); i++)
+	{
+		float xshift = xShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
+		float yshift = yShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
+
+		averagexshift+=xshift;
+		averageyshift+=yshift;
+
+		if(i==ImageList.size()-1)
+		{
+			averagexshift/=(ImageList.size()-1);
+			averageyshift/=(ImageList.size()-1);
+		}
+	}
+
+
+
+	Debug("Average x shift is " + Lex(averagexshift));
+	Debug("Average y shift is " + Lex(averageyshift));
+
+	int xc = round(averagexshift)*sgn(currentimage-referenceimage) + miSize/2;
+	int yc = round(averageyshift)*sgn(currentimage-referenceimage) + miSize/2;
+
+
+	// Create arrays to hold results of each individual trial run
+	int* zeroes = new int[256*256*20*20];
+	for (int i = 0 ; i < 256*256*20*20; i++)
+	{
+		zeroes[i] = 0;
+	}
+
+	float* mapdata;
+	Gatan::PlugIn::ImageDataLocker MILocker;
+
+	try{
+		// Get pointer to map data at correct position
+		MILocker = Gatan::PlugIn::ImageDataLocker(MIMap);
+		mapdata = (float*)MILocker.get();
+	}
+	catch(...)
+	{
+		DigitalMicrograph::Result("Problem getting locker to MI Map\n");
+	}
+	 // std::vector<float> mapdata(miSize*miSize);
+
+	std::vector<int> hA(256);
+	std::vector<int> hB(256);
+	std::vector<int> hAB(256*256);
+
+	float size = width*height;
+
+	for(int i = 0 ; i < 256; i++)
+	{
+		hA[i]=0;
+		hB[i]=0;
+
+		for(int j = 0 ; j < 256; j++)
+		{
+			hAB[i+256*j]=0;
+		}
+	}
+
+	// Calculate work group sizes
+	size_t* globalWorkSize = new size_t[3];
+	globalWorkSize[0] = width;
+	globalWorkSize[1] = height;
+	globalWorkSize[2] = 1;
+
+	size_t* LocalWorkSize = new size_t[3];
+	LocalWorkSize[0] = 32;
+	LocalWorkSize[1] = 8;
+	LocalWorkSize[2] = 1;
+
+	size_t* HistoWorkSize = new size_t[3];
+	HistoWorkSize[0] = 256;
+	HistoWorkSize[1] = 256;
+	HistoWorkSize[2] = 1;
+
+	int nGroups = 256;
+
+	size_t* globalSizeSum = new size_t[3];
+	size_t* localSizeSum = new size_t[3];
+
+	globalSizeSum[0] = 256*256;
+	globalSizeSum[1] = 1;
+	globalSizeSum[2] = 1;
+	localSizeSum[0] = 256;
+	localSizeSum[1] = 1;
+	localSizeSum[2] = 1;
+
+	clMem.clSumOutputFloat= clCreateBuffer(clState::context,CL_MEM_READ_WRITE,nGroups*sizeof(float),0,&clState::status);
+	clMem.clSumOutputUint= clCreateBuffer(clState::context,CL_MEM_READ_WRITE,nGroups*sizeof(unsigned int),0,&clState::status);
+
+
+	int nG = ceil((float)width*height/(32*8));
+
+	// Create memory buffers 
+	// MAKE SURE WE USE THESE AND NOT THE CLMEM.clImage1
+	cl_mem clJH		= clCreateBuffer ( clState::context, CL_MEM_READ_WRITE, 256 * 256 * 20 * 20 *  sizeof(int), 0, &clState::status);
+	cl_mem clGPUEntropy = clCreateBuffer( clState::context, CL_MEM_READ_WRITE, 256 * 256 *  sizeof(float), 0, &clState::status);
+
+	// Size not including outlier rejection.
+	float reducedsize = 0;
+	float reducedsize2 = 0;
+	int llimit = 2;
+	int ulimit  = 253;
+		
+	/*for (int i = 0; i < width; i++)
+		for (int j = 0; j < height; j++)
+		{
+			int bin1 = floor((im1[i+width*j]-min)/(max-min) * 255.0f);
+			int bin2 = floor((im2[i+width*j]-min)/(max-min) * 255.0f);
+
+			if(bin1>255)
+				bin1=255;
+			if(bin1<0)
+				bin1=0;
+				
+			if(bin2>255)
+				bin2=255;
+			if(bin2<0)
+				bin2=0;
+
+			hA[bin1]++;
+			hB[bin2]++;
+
+			
+			if(!(bin1<llimit||bin1>ulimit))
+			{
+				reducedsize++;
+			}
+			if(!(bin2<llimit||bin2>ulimit))
+			{
+				reducedsize2++;
+			}
+		}
+	*/
+
+		// Now images always on GPU, need a GPU method to calculate single histograms also...
+		float eA(0); // Don't calculate single histograms, contribution is the same for every pixel...
+		float eB(0);
+
+		/*for(int i = llimit; i < ulimit; i++)
+		{
+			if(hA[i]!=0)
+			{
+				eA+= -((float)hA[i]/reducedsize) * log(((float)hA[i]/reducedsize));
+			}
+
+			if(hB[i]!=0)
+			{
+				eB+= -((float)hB[i]/reducedsize2) * log(((float)hB[i]/reducedsize2));
+			}
+		}*/
+		
+		// Set Kernel Arguments
+
+		for(int k = 0; k < miSize; k+=20)
+			for(int l = 0; l < miSize; l+=20)
+			{
+				int a2 = 0 - miSize/2 + k; // is 0 at 30 or 31???
+				int b2 = 0 - miSize/2 + l;
+
+				//if(!(a2==0&&b2==0))
+				//{
+
+					//int a2 = preshiftx-miSize/2 + k;
+					//int b2 = preshifty - miSize/2 + l;
+
+					clEnqueueWriteBuffer(clState::clq->cmdQueue,clJH,CL_TRUE,0,256*256*20*20*sizeof(int),zeroes,0,NULL,NULL);
+
+					cl_k_JointHistogramComplex.SetArgT(0,ImageOne);
+					cl_k_JointHistogramComplex.SetArgT(1,ImageTwo);
+					cl_k_JointHistogramComplex.SetArgT(2,clJH);
+					cl_k_JointHistogramComplex.SetArgT(3,width);
+					cl_k_JointHistogramComplex.SetArgT(4,height);
+					cl_k_JointHistogramComplex.SetArgT(5,max);
+					cl_k_JointHistogramComplex.SetArgT(6,min);
+					cl_k_JointHistogramComplex.SetArgT(7,max);
+					cl_k_JointHistogramComplex.SetArgT(8,min);
+					cl_k_JointHistogramComplex.SetArgT(9,a2);
+					cl_k_JointHistogramComplex.SetArgT(10,b2);
+					cl_k_JointHistogramComplex.SetArgLocalMemory(11,51*27,clInt);
+					//cl_k_JointHistogram.SetArgLocalMemory(12,51*27,clInt);
+
+					cl_k_JointHistogramComplex.Enqueue3D(globalWorkSize,LocalWorkSize);					
+
+					// Retrieve Joint Histogram;
+					//Utility::DisplayArray(&hA[0],"A",256,1);
+					//Utility::DisplayArray(&hB[0],"B",256,1);
+					//Utility::DisplayArray(&hAB[0],"AB",256,256);
+
+					cl_k_RSize.SetArgT(0,clJH);
+					cl_k_RSize.SetArgT(3,llimit);
+					cl_k_RSize.SetArgT(4,ulimit);
+					cl_k_Entropy.SetArgT(0,clJH);
+					cl_k_Entropy.SetArgT(1,clGPUEntropy);
+
+					for(int xx = 0; xx < 20; xx++)
+						for(int yy = 0; yy < 20; yy++)
+						{
+							int histo =xx+20*yy;
+							cl_k_RSize.SetArgT(1,histo);
+							cl_k_RSize.SetArgT(2,histo);
+							cl_k_RSize.Enqueue(HistoWorkSize);
+
+							float rsize = SumReductionUint(clJH,globalSizeSum,localSizeSum,256,256*256,histo*256*256);
+
+							//Debug(Lex(rsize));
+
+							//clEnqueueReadBuffer(clState::clq->cmdQueue,clJH,CL_TRUE,( xx + 20 * yy ) * (256*256*sizeof(int)),256*256*sizeof(int),&hAB[0],0,NULL,NULL);
+							
+							cl_k_Entropy.SetArgT(2,histo);
+							cl_k_Entropy.SetArgT(3,rsize);
+							cl_k_Entropy.Enqueue(HistoWorkSize);
+
+							// only place eA + eB are used, the single histogram entropies...
+							float mi = eA + eB - SumReductionFloat(clGPUEntropy,globalSizeSum,localSizeSum,256,256*256,0);
+
+							mapdata[imagenumber*miSize*miSize + (k+xx)+miSize*(l+yy)] = mi;
+							// * (80.0f/(80.0f + abs(k+xx-xc)))*(80.0f/(80.0f + abs(l+yy-yc)));
+
+						}
+			}
+
+		clReleaseMemObject(clJH);
+		clReleaseMemObject(clGPUEntropy);
+		clReleaseMemObject(clMem.clSumOutputFloat);
+		clReleaseMemObject(clMem.clSumOutputUint);
+
+		clFinish(clState::clq->cmdQueue);
+		
+		delete[] zeroes;
+		
+		int xShift;
+		int yShift;
+		float subXShift;
+		float subYShift;
+		float maxHeight1;
+
+		// Translate linear array index into row and column.
+		PCPCFLib::GetShiftsMIPreConditioned(xShift,yShift,subXShift,subYShift,maxHeight1,mapdata+imagenumber*miSize*miSize,miSize,miSize,options.maxdrift,averagexshift*sgn(currentimage-referenceimage),averageyshift*sgn(currentimage-referenceimage));
+
+		xShiftVals[currentimage] =  preshiftx + xShift;
+		yShiftVals[currentimage] = preshifty + yShift;
+		subXShifts[currentimage] = preshiftx + xShift + subXShift;
+		subYShifts[currentimage] = preshifty + yShift + subYShift;
+		defocusshifts[currentimage] = expectedDF;
+
+		MIMap.GetImageDisplay(0).SetDisplayedLayers(imagenumber,imagenumber);
+}
+
+
 
 void Registration::MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries, size_t* globalWorkSize)
 {
@@ -2458,7 +2887,6 @@ void Registration::RotationScale(float* seriesdata, size_t* fullWorkSize, std::v
 			cl_k_RotScale.Enqueue(fullWorkSize);
 
 			/*clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.rotScaleImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&copyImage[0],0,NULL,NULL);
-
 			for(int j = 0; j < fullheight;j++)
 				for(int i = 0; i < fullwidth;i++)
 				{
@@ -2568,7 +2996,15 @@ void Registration::DeterminePadding(ROIPositions ROIpos)
 		padTop = ceil(abs(maxnegy)-ROIpos.iTop);
 
 	if (maxposy-ROIpos.iBottom > 0)
-		padBottom = ceil(maxposy-ROIpos.iBottom);	
+		padBottom = ceil(maxposy-ROIpos.iBottom);
+
+
+	// Otherwise can try load elements outside of image boundaries through interpolation in PadCrop routine.
+	if(ROIpos.iRight == width && padRight==0);
+		padRight=1;
+
+	if(ROIpos.iBottom == height && padBottom==0);
+		padBottom=1;
 }
 
 float Registration::SumReduction(cl_mem &Array, size_t* globalSizeSum, size_t* localSizeSum, int nGroups, int totalSize)
