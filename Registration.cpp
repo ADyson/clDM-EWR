@@ -2399,8 +2399,6 @@ void Registration::MutualInformationFaster(int numberoftrials, float expectedDF,
 							float mi = eA + eB - SumReductionFloat(clGPUEntropy,globalSizeSum,localSizeSum,256,256*256,0);
 
 							mapdata[imagenumber*miSize*miSize + (k+xx)+miSize*(l+yy)] = mi;
-							// * (80.0f/(80.0f + abs(k+xx-xc)))*(80.0f/(80.0f + abs(l+yy-yc)));
-
 						}
 			}
 
