@@ -40,6 +40,22 @@
 #define IDC_COARSE                      1027
 #define IDC_BUTTONUP                    1028
 #define IDC_BUTTONSTART                 1029
+#define IDC_GET                         1030
+#define IDC_SETKV                       1031
+#define IDC_SETFSTEP                    1032
+#define IDC_SETCAL                      1033
+#define IDC_SETNORMAL                   1034
+#define IDC_SETALIGN                    1035
+#define IDC_SETX                        1036
+#define IDC_SETY                        1037
+#define IDC_DISABLE                     1038
+#define IDC_ENABLE                      1039
+#define IDC_LIST2                       1042
+#define IDC_EDITKV                      1043
+#define IDC_EDITDF                      1044
+#define IDC_EDITCAL                     1045
+#define IDC_NORMAL                      1046
+#define IDC_ALIGN                       1047
 #define IDD_DMDIALOG                    6000
 #define IDC_BUTTON1                     6001
 #define IDC_BUTTON2                     6002
@@ -54,6 +70,7 @@
 #define IDD_DIALOG2                     6007
 #define IDC_BUTTONSHOW                  6007
 #define IDC_BUTTONFINISH                6008
+#define IDD_SERIESDIALOG                6008
 #define IDC_BUTTONCLEAR                 6009
 #define IDC_TAB1                        6011
 #define IDC_EDIT3                       6012
@@ -69,9 +86,13 @@
 #define IDC_EDIT11                      6029
 #define IDC_B2R                         6030
 #define IDC_EDITMAXDRIFT                6030
+#define IDC_EDIT13                      6030
+#define IDC_EDITXDRIFT                  6030
 #define IDC_EDIT40                      6031
 #define IDC_B2I                         6031
 #define IDC_EDITSNR                     6031
+#define IDC_EDIT14                      6031
+#define IDC_EDITYDRIFT                  6031
 #define IDC_EDIT41                      6032
 #define IDC_A3R                         6032
 #define IDC_EDIT12                      6033
@@ -87,9 +108,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        106
+#define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1030
+#define _APS_NEXT_CONTROL_VALUE         1048
 #define _APS_NEXT_SYMED_VALUE           104
 #endif
 #endif

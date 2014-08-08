@@ -11,6 +11,7 @@
 #include "resource.h"		// main symbols
 
 #include "DMDialog.h"
+#include "SeriesFunctions.h"
 
 // CTemplateMFCDialogPlugInApp
 // See TemplateMFCDialogPlugIn.cpp for the implementation of this class
@@ -20,6 +21,7 @@ class CTemplateMFCDialogPlugInApp : public Gatan::PlugIn::PlugInMain, public Gat
 {
 private:
 	ulong_ptr_t fMFCPaletteHandle1;
+	ulong_ptr_t fMFCPaletteHandle2;
 public:
 	CTemplateMFCDialogPlugInApp()  {}
 	~CTemplateMFCDialogPlugInApp() {}

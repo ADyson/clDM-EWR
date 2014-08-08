@@ -22,3 +22,6 @@ void SetWindowString(HWND hwnd, std::string s)
 {    
 	SetWindowText(hwnd, s.c_str());
 }
+
+
+

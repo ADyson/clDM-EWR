@@ -24,7 +24,8 @@ void CTemplateMFCDialogPlugInApp::Start(void)
 	AddFunction("void XCFPCFPCPCF(RealImagePtr,RealImagePtr,long)", (void *)XCFPCFPCPCF);
 	AddFunction("void Magnification(RealImagePtr,RealImagePtr)", (void *)Magnification);
 	AddFunction("void MagnificationTest(RealImagePtr,RealImagePtr,float,long,float,float)", (void *)MagnificationTest);
-	fMFCPaletteHandle1=RegisterMFCPalette("OCL - EWR", GetPlugInOSHandle(), RUNTIME_CLASS(CDMDialog),3);
+	fMFCPaletteHandle1=RegisterMFCPalette("clDM-EWR", GetPlugInOSHandle(), RUNTIME_CLASS(CDMDialog),3);
+	fMFCPaletteHandle2 = RegisterMFCPalette("Focal Series Helper", GetPlugInOSHandle(), RUNTIME_CLASS(SeriesFunctionsDialog), 3);
 }
 void CTemplateMFCDialogPlugInApp::End(void)
 {

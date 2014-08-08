@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Acquisition.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjustRecon.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="amsEdit.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="clFourier.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="clKernel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="clState.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="DMDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="DMScriptFunctions.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="FTSR.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ManualAlignment.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MutualInformation.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MyTabCtrl.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="NumEdit.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionsDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PCPCFFunction.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PCPCFLib.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Registration.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SeriesFunctions.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="standardfunctions.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TemplateMFCDialogPlugIn.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkerClass.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Acquisition.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="amsEdit.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjustRecon.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="clFourier.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="clKernel.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CLKernels.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="clKernels2.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="clKernels3.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="clKernelsAdjust.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="clState.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="DMDialog.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="DMScriptFunctions.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="FTSR.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ManualAlignment.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MutualInformation.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MyTabCtrl.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="NumEdit.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionsDialog.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="PCPCFFunction.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="PCPCFLib.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Registration.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ROIPositions.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchDialog.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SeriesFunctions.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="standardfunctions.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="TemplateMFCDialogPlugIn.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkerClass.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="VERSION.txt" />
+    <None Include="res\TemplateMFCDialogPlugIn.rc2">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{3ae94761-da32-4862-be81-ecd040c8d000}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{9fd57e9c-8ce8-41dd-82f1-e4e75e64f734}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{8c8613a8-4ae0-424a-8a56-2c40863ad594}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TemplateMFCDialogPlugIn.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
