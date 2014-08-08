@@ -3,6 +3,8 @@
 #include "Registration.h"
 #include "clState.h" // gives access to global clContext etc..
 #include "PCPCFLib.h"
+#include <algorithm>
+#include <numeric>
 
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
@@ -656,21 +658,45 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 	std::vector< std::complex< float > > dataOne( width*height );
 	std::vector< std::complex< float > > dataTwo( width*height );
 
+	referenceimage = options.reference;
+
 	// Check if reference image is allowed...
-	if(referenceimage >= NumberOfImages )
+	if (referenceimage >= NumberOfImages)
 	{
 		referenceimage = NumberOfImages - 1;
 	}
 
-	referenceimage = options.reference;
+	while (!(SelectedSeries[referenceimage].second || referenceimage == NumberOfImages - 1))
+	{
+		referenceimage++;
+	}
+
+	while (!(SelectedSeries[referenceimage].second || referenceimage == 0))
+	{
+		referenceimage--;
+	}
+
+	// Should scan up then down to make sure a reference image that is selected is available...
+
+
 	int imageone = referenceimage;
 	currentimage = referenceimage;
 
 	// Reference image already registered, it has fixed position.
 	ImageList.push_back(referenceimage);
 
+	int NumberOfSelectedImages = 0;
+
+	for each(std::pair<int, bool> pair in SelectedSeries)
+	{
+		if (pair.second)
+			NumberOfSelectedImages++;
+	}
+
+	Debug(Lex(NumberOfSelectedImages) + " images selected");
+	
 	// Loop over all images to perform registration
-	for(int n = 0; n < NumberOfImages - 1; n++)
+	for (int n = 0; n < NumberOfSelectedImages - 1; n++)
 	{
 		if(n < 2) // Different behaviour for first two images
 		{
@@ -692,9 +718,6 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			// Positive focus difference if imagetwo > imageone
 			float expecteddifference = CalculateExpectedDF(imageone,currentimage);
 
-			//CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
-			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
-
 			cl_k_PadCrop.SetArgT(0,fullimages[imageone]);
 			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
 			cl_k_PadCrop.Enqueue(globalWorkSize);
@@ -706,22 +729,12 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			// If the ROI takes up the entire region of the image, could be a promble??
 			// Enforce a padding of at least one on right and bottom in this case????
 
-
 			// Reset arguments to defaults
 			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
 			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
 
-			// Insert Magnification Finding Routine
-			//MagnificationPCF(30,expecteddifference,dataOne,0,0,globalWorkSize,rotscaledseries,ROIpos.iLeft,ROIpos.iTop,currentimage);
-
-			//clEnqueueWriteBuffer( clState::clq->cmdQueue , clMem.clImage1, CL_FALSE, 0, width*height*sizeof(std::complex<float>) , &dataOne[ 0 ], 
-			//			0, NULL, NULL );
-			//clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 
-			//			0, NULL, NULL );
-
 			Window(clMem.clImage1,width,height);
 			Window(clMem.clImage2,width,height);
-
 
 			//Start timer
 			clock_t begin = clock();
@@ -737,8 +750,7 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			{
 				numberoftrials = options.steps;
 			}
-
-			
+		
 			PhaseCompensatedPCF(numberoftrials,expecteddifference,dataOne,0,0,globalWorkSize);
 
 			//Stop timer
@@ -749,7 +761,6 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			Debug("Alignment took "+Lex(elapsed_millisecs)+"ms");
 			// Add to list of registered images.
 			ImageList.push_back(currentimage);
-
 		} 
 		else 
 		{
@@ -760,6 +771,7 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			DeterminePadding(ROIpos);
 			
 			clock_t start = clock();
+
 			// Add currently registered images to a reconstruction
 			AddToReconstruction(rotscaledseries,globalWorkSize,0,0,0);
 
@@ -782,55 +794,42 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 
 			OpenCLFFT->Enqueue(clMem.clRestored,clMem.clFFTImage1,CLFFT_FORWARD);
 
-			// Determine the amount to preshift the next image by so it is already closer to alignment (i.e start from alignment of next closest image)
-			bool prevImageRegistered = false;
-			bool nextImageRegistered = false;
+			// Want to find expected shift, by defocus difference average shift per nm so far...
+			std::vector<float> averagexshifts;
+			std::vector<float> averageyshifts;
 
-			for(int i = 1; i <= ImageList.size(); i++)
+			for (int i = 1; i <= ImageList.size(); i++)
 			{
-								
-				if(ImageList[i-1]==currentimage-1)
+				if (ImageList[i - 1] != referenceimage)
 				{
-					prevImageRegistered = true;
-					break;
-				}
-				if(ImageList[i-1]==currentimage+1)
-				{
-					nextImageRegistered = true;
-					break;
+					averagexshifts.push_back(xShiftVals[ImageList[i - 1]] / defocusshifts[ImageList[i - 1]]);
+					averageyshifts.push_back(yShiftVals[ImageList[i - 1]] / defocusshifts[ImageList[i - 1]]);
 				}
 			}
-
-			int preshiftx = 0;
-			int preshifty = 0;
 			
-			if(prevImageRegistered)
-			{
-				preshiftx = xShiftVals[currentimage-1];
-				preshifty = yShiftVals[currentimage-1];
-			}
+			float avx = std::accumulate(averagexshifts.begin(), averagexshifts.end(), 0.0f) / averagexshifts.size();
+			float avy = std::accumulate(averageyshifts.begin(), averageyshifts.end(), 0.0f) / averageyshifts.size();
 
-			if(nextImageRegistered)
-			{
-				preshiftx = xShiftVals[currentimage+1];
-				preshifty = yShiftVals[currentimage+1];
-			}
+			// Now to preshift based on the average, and the defocus difference from the reference image :)
+			
+			float preshiftx = avx * CalculateExpectedDF(referenceimage, currentimage); // Not sure if this is the correct way around
+			float preshifty = avy * CalculateExpectedDF(referenceimage, currentimage); // It is used this way to determine the defocus for the dfshifts.
+
 
 			// Cant have it checking an image area that doesnt exist anymore
-			if( ROIpos.iLeft + preshiftx < 0)
-				preshiftx -=( preshiftx + ROIpos.iLeft );
+			if (ROIpos.iLeft + preshiftx < 0)
+				preshiftx -= (preshiftx + ROIpos.iLeft);
 
-			if( ROIpos.iLeft + preshiftx + width >= fullwidth)
-				preshiftx -=( ROIpos.iLeft + preshiftx + width - fullwidth);
+			if (ROIpos.iLeft + preshiftx + width >= fullwidth)
+				preshiftx -= (ROIpos.iLeft + preshiftx + width - fullwidth);
 
-			if( ROIpos.iTop + preshifty < 0)
-				preshifty -=( preshifty + ROIpos.iTop );
+			if (ROIpos.iTop + preshifty < 0)
+				preshifty -= (preshifty + ROIpos.iTop);
 
-			if( ROIpos.iTop + preshifty + height >= fullheight)
-				preshiftx -=( ROIpos.iTop + preshifty + height - fullheight);
+			if (ROIpos.iTop + preshifty + height >= fullheight)
+				preshiftx -= (ROIpos.iTop + preshifty + height - fullheight);
 
-
-			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,preshiftx,preshifty);
+			// Ideally this makes the preshift so that the cropped image is right on the edge of the full image and doesnt need any padding (havent checked).
 
 			float presx = preshiftx;
 			float presy = preshifty;
@@ -849,8 +848,6 @@ void Registration::RegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_mem
 			// Reset arguments to defaults
 			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
 			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
-
-			//clEnqueueWriteBuffer( clState::clq->cmdQueue, clMem.clImage2, CL_TRUE, 0, width*height*sizeof(std::complex<float>) , &dataTwo[ 0 ], 0, NULL, NULL );
 
 			// Hanning Window the second image.
 			Window(clMem.clImage2,width,height);
@@ -1035,22 +1032,44 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 	std::vector< std::complex< float > > dataOne( width*height );
 	std::vector< std::complex< float > > dataTwo( width*height );
 
+	referenceimage = options.reference;
+
 	// Check if reference image is allowed...
 	if(referenceimage >=NumberOfImages )
 	{
 		referenceimage = NumberOfImages - 1;
 	}
 
+	while (!(SelectedSeries[referenceimage].second || referenceimage==NumberOfImages-1))
+	{
+		referenceimage++;
+	}
 
-	referenceimage = options.reference;
+	while (!(SelectedSeries[referenceimage].second || referenceimage == 0))
+	{
+		referenceimage--;
+	}
+
+	// Should scan up then down to make sure a reference image that is selected is available...
 	int imageone = referenceimage;
 	currentimage = referenceimage;
 
 	// Reference image already registered, it has fixed position.
 	ImageList.push_back(referenceimage);
 
+	int NumberOfSelectedImages = 0;
+
+	for each(std::pair<int, bool> pair in SelectedSeries)
+	{
+		if (pair.second)
+			NumberOfSelectedImages++;
+	}
+
+	Debug(Lex(NumberOfSelectedImages) + " images selected");
+
+
 	// Loop over all images to perform registration
-	for(int n = 0; n < NumberOfImages - 1; n++)
+	for(int n = 0; n < NumberOfSelectedImages - 1; n++)
 	{
 		if(n < 2)
 		{
@@ -1071,8 +1090,6 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 			// Positive focus difference if imagetwo > imageone
 			float expecteddifference = CalculateExpectedDF(imageone,currentimage);
 
-			//CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
-			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
 
 			cl_k_PadCrop.SetArgT(0,fullimages[imageone]);
 			cl_k_PadCrop.SetArgT(1,clMem.clImage1);
@@ -1084,7 +1101,6 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 
 			// If the ROI takes up the entire region of the image, could be a promble??
 			// Enforce a padding of at least one on right and bottom in this case????
-
 
 			// Reset arguments to defaults
 			cl_k_PadCrop.SetArgT(0,clMem.fullImage);
@@ -1098,13 +1114,10 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 					expecteddifference = sgn(currentimage-imageone) * options.focuslist[currentimage];
 			}
 
-			//CopyImageData(imageone,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,0,0);
-			//CopyImageData(currentimage,ROIpos.iLeft,ROIpos.iTop,dataTwo,rotscaledseries,0,0);
 		
 			// Get number of trial steps
 			// Assume one if it is not specified
 			int numberoftrials = 1;
-
 
 			// with regards to passing the image number to specify what location to put the map. there are N-1 different maps, first image is 0, last image is 19..
 			// If image number is less than reference pass image number, if its greater than reference pass image number -1....
@@ -1125,74 +1138,117 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 			// Find out if it is necessary to pad the images.
 			DeterminePadding(ROIpos);
 			
-			// Determine the amount to preshift the next image by so it is already closer to alignment (i.e start from alignment of next closest image)
-			bool prevImageRegistered = false;
-			bool nextImageRegistered = false;
 
-			int otherimage;
+			// Here the preshift is  slightly different for MI
+			// Want to find expected shift, by defocus difference average shift per nm so far...
+			std::vector<float> averagexshifts;
+			std::vector<float> averageyshifts;
 
-			for(int i = 1; i <= ImageList.size(); i++)
+			for (int i = 1; i <= ImageList.size(); i++)
 			{
-								
-				if(ImageList[i-1]==currentimage-1)
+				if (ImageList[i - 1] != referenceimage)
 				{
-					prevImageRegistered = true;
-					break;
-				}
-				if(ImageList[i-1]==currentimage+1)
-				{
-					nextImageRegistered = true;
-					break;
+					averagexshifts.push_back(xShiftVals[ImageList[i - 1]] / defocusshifts[ImageList[i - 1]]);
+					averageyshifts.push_back(yShiftVals[ImageList[i - 1]] / defocusshifts[ImageList[i - 1]]);
 				}
 			}
-			
-			int preshiftx = 0;
-			int preshifty = 0;
-			
-			if(prevImageRegistered)
-			{
-				otherimage = currentimage - 1;
-				preshiftx = xShiftVals[currentimage-1];
-				preshifty = yShiftVals[currentimage-1];
-			}
 
-			if(nextImageRegistered)
-			{
-				otherimage = currentimage+1;
-				preshiftx = xShiftVals[currentimage+1];
-				preshifty = yShiftVals[currentimage+1];
-			}
+			float avx = std::accumulate(averagexshifts.begin(), averagexshifts.end(), 0.0f) / averagexshifts.size();
+			float avy = std::accumulate(averageyshifts.begin(), averageyshifts.end(), 0.0f) / averageyshifts.size();
+
+			// Now to preshift based on the average, and the defocus difference from the reference image :)
+
+			float preshiftx = avx * CalculateExpectedDF(referenceimage, currentimage); // Not sure if this is the correct way around
+			float preshifty = avy * CalculateExpectedDF(referenceimage, currentimage); // It is used this way to determine the defocus for the dfshifts.
+
 
 			// Cant have it checking an image area that doesnt exist anymore
-			if( ROIpos.iLeft + preshiftx < 0)
-				preshiftx -=( preshiftx + ROIpos.iLeft );
+			if (ROIpos.iLeft + preshiftx < 0)
+				preshiftx -= (preshiftx + ROIpos.iLeft);
 
-			if( ROIpos.iLeft + preshiftx + width >= fullwidth)
-				preshiftx -=( ROIpos.iLeft + preshiftx + width - fullwidth);
+			if (ROIpos.iLeft + preshiftx + width >= fullwidth)
+				preshiftx -= (ROIpos.iLeft + preshiftx + width - fullwidth);
 
-			if( ROIpos.iTop + preshifty < 0)
-				preshifty -=( preshifty + ROIpos.iTop );
+			if (ROIpos.iTop + preshifty < 0)
+				preshifty -= (preshifty + ROIpos.iTop);
 
-			if( ROIpos.iTop + preshifty + height >= fullheight)
-				preshiftx -=( ROIpos.iTop + preshifty + height - fullheight);
+			if (ROIpos.iTop + preshifty + height >= fullheight)
+				preshiftx -= (ROIpos.iTop + preshifty + height - fullheight);
 
-			float expecteddifference = CalculateExpectedDF(otherimage,currentimage);
+			// Ideally this makes the preshift so that the cropped image is right on the edge of the full image and doesnt need any padding (havent checked).
 
-			// Should select the correct focal displacement from the list...
-			if(options.knownfocus)
-			{
-				if(sgn(currentimage-otherimage) > 0)
-					expecteddifference = sgn(currentimage-otherimage) * options.focuslist[currentimage-1];
-				else
-					expecteddifference = sgn(currentimage-otherimage) * options.focuslist[currentimage];
-			}
+			float presx = preshiftx;
+			float presy = preshifty;
 
-			// Add currently registered images to a reconstruction
+			float expecteddifference = CalculateExpectedDF(referenceimage, currentimage);
 
-			// NOTE: Want to make reconstruction offset by a defocus to get in plane of next registration attempt...
-			// Also want to put result into dataOne for the MI routines
-			// Image is added with w at defocusshifts + dfguess... this should make it so the current image would be reconstructed at zero??
-			AddToReconstruction(rotscaledseries,globalWorkSize,-(expecteddifference+defocusshifts[otherimage]),0,0);
+			// Trying to get the reconstruction to be at zero for the plane of this image...
+			AddToReconstruction(rotscaledseries, globalWorkSize, -expecteddifference, 0, 0);
+
+			//int otherimage;
+
+			//for(int i = 1; i <= ImageList.size(); i++)
+			//{
+			//					
+			//	if(ImageList[i-1]==currentimage-1)
+			//	{
+			//		prevImageRegistered = true;
+			//		break;
+			//	}
+			//	if(ImageList[i-1]==currentimage+1)
+			//	{
+			//		nextImageRegistered = true;
+			//		break;
+			//	}
+			//}
+			//
+			//int preshiftx = 0;
+			//int preshifty = 0;
+			//
+			//if(prevImageRegistered)
+			//{
+			//	otherimage = currentimage - 1;
+			//	preshiftx = xShiftVals[currentimage-1];
+			//	preshifty = yShiftVals[currentimage-1];
+			//}
+
+			//if(nextImageRegistered)
+			//{
+			//	otherimage = currentimage+1;
+			//	preshiftx = xShiftVals[currentimage+1];
+			//	preshifty = yShiftVals[currentimage+1];
+			//}
+
+			//// Cant have it checking an image area that doesnt exist anymore
+			//if( ROIpos.iLeft + preshiftx < 0)
+			//	preshiftx -=( preshiftx + ROIpos.iLeft );
+
+			//if( ROIpos.iLeft + preshiftx + width >= fullwidth)
+			//	preshiftx -=( ROIpos.iLeft + preshiftx + width - fullwidth);
+
+			//if( ROIpos.iTop + preshifty < 0)
+			//	preshifty -=( preshifty + ROIpos.iTop );
+
+			//if( ROIpos.iTop + preshifty + height >= fullheight)
+			//	preshiftx -=( ROIpos.iTop + preshifty + height - fullheight);
+
+			//float expecteddifference = CalculateExpectedDF(otherimage,currentimage);
+
+			//// Should select the correct focal displacement from the list...
+			//if(options.knownfocus)
+			//{
+			//	if(sgn(currentimage-otherimage) > 0)
+			//		expecteddifference = sgn(currentimage-otherimage) * options.focuslist[currentimage-1];
+			//	else
+			//		expecteddifference = sgn(currentimage-otherimage) * options.focuslist[currentimage];
+			//}
+
+			//// Add currently registered images to a reconstruction
+
+			//// NOTE: Want to make reconstruction offset by a defocus to get in plane of next registration attempt...
+			//// Also want to put result into dataOne for the MI routines
+			//// Image is added with w at defocusshifts + dfguess... this should make it so the current image would be reconstructed at zero??
+			//AddToReconstruction(rotscaledseries,globalWorkSize,-(expecteddifference+defocusshifts[otherimage]),0,0);
 
 			// Need to turn reconstructed ew into fft of image intensity(probably).
 
@@ -1200,19 +1256,11 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 
 			OpenCLFFT->Enqueue(clMem.clFFTImage2,clMem.clRestored,CLFFT_BACKWARD);
 			
-			
 			//cl_k_Abs.Enqueue(globalWorkSize); // Check this acts on clRestored?
 
 
 			// Don't need to check reconstructed images..
 			//Utility::PrintCLMemToImage(clMem.clRestored,"restored"+Lex(n),width,height,clFloat2,clState::clq);
-
-			//clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.clRestored,CL_TRUE,0,width*height*sizeof(std::complex<float>),&dataOne[0],0,0,0);
-
-			//CopyImageData(otherimage,ROIpos.iLeft,ROIpos.iTop,dataOne,rotscaledseries,preshiftx,preshifty);
-
-			float presx = preshiftx;
-			float presy = preshifty;
 
 			cl_k_PadCrop.SetArgT(4,padLeft);
 			cl_k_PadCrop.SetArgT(5,padRight);
@@ -1241,7 +1289,8 @@ void Registration::MIRegisterSeries(float* seriesdata, ROIPositions ROIpos, cl_m
 
 			Debug("MI finished");
 
-			defocusshifts[currentimage]+=defocusshifts[otherimage];
+			// Defocus shift should be correct now, doesnt need modifying....
+			//defocusshifts[currentimage]+=defocusshifts[otherimage];
 
 			ImageList.push_back(currentimage);
 		}
@@ -1906,28 +1955,6 @@ void Registration::MutualInformation(int numberoftrials, float expectedDF, std::
 void Registration::MutualInformationFast(int numberoftrials, float expectedDF, std::vector<std::complex<float>> &dataOne, std::vector<std::complex<float>> &dataTwo, int preshiftx, int preshifty, size_t* globalWorkSize, int miSize, DigitalMicrograph::Image &MIMap, int imagenumber)
 {
 
-			float averagexshift =0;
-			float averageyshift =0;
-
-			for(int i = 1; i < ImageList.size(); i++)
-			{
-				float xshift = xShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
-				float yshift = yShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
-
-				averagexshift+=xshift;
-				averageyshift+=yshift;
-			}
-
-			averagexshift/=(ImageList.size()-1);
-			averageyshift/=(ImageList.size()-1);
-
-			Debug("Average x shift is " + Lex(averagexshift));
-			Debug("Average y shift is " + Lex(averageyshift));
-
-			int xc = round(averagexshift)*sgn(currentimage-referenceimage) + miSize/2;
-			int yc = round(averageyshift)*sgn(currentimage-referenceimage) + miSize/2;
-
-
 	// Create arrays to hold results of each individual trial run
 	int* zeroes = new int[256*256*20*20];
 	for (int i = 0 ; i < 256*256*20*20; i++)
@@ -2138,7 +2165,7 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 
 							float mi = eA + eB - SumReductionFloat(clGPUEntropy,globalSizeSum,localSizeSum,256,256*256,0);
 
-							mapdata[imagenumber*miSize*miSize + (k+xx)+miSize*(l+yy)] = mi * (80.0f/(80.0f + abs(k+xx-xc)))*(80.0f/(80.0f + abs(l+yy-yc)));
+							mapdata[imagenumber*miSize*miSize + (k+xx)+miSize*(l+yy)] = mi;
 
 						}
 			}
@@ -2161,7 +2188,7 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 		float maxHeight1;
 
 		// Translate linear array index into row and column.
-		PCPCFLib::GetShiftsMIPreConditioned(xShift,yShift,subXShift,subYShift,maxHeight1,mapdata+imagenumber*miSize*miSize,miSize,miSize,options.maxdrift,averagexshift*sgn(currentimage-referenceimage),averageyshift*sgn(currentimage-referenceimage));
+		PCPCFLib::GetShiftsMI(xShift,yShift,subXShift,subYShift,maxHeight1,mapdata+imagenumber*miSize*miSize,miSize,miSize,options.maxdrift);
 
 		xShiftVals[currentimage] =  preshiftx + xShift;
 		yShiftVals[currentimage] = preshifty + yShift;
@@ -2174,34 +2201,7 @@ void Registration::MutualInformationFast(int numberoftrials, float expectedDF, s
 
 void Registration::MutualInformationFaster(int numberoftrials, float expectedDF, cl_mem &ImageOne, cl_mem &ImageTwo, int preshiftx, int preshifty, size_t* globalWorkSize, int miSize, DigitalMicrograph::Image &MIMap, int imagenumber)
 {
-
-	float averagexshift =0;
-	float averageyshift =0;
-
-	// Ignores first image with shift zero always
-	for(int i = 1; i < ImageList.size(); i++)
-	{
-		float xshift = xShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
-		float yshift = yShiftVals[ImageList[i]]/(ImageList[i]-referenceimage);
-
-		averagexshift+=xshift;
-		averageyshift+=yshift;
-
-		if(i==ImageList.size()-1)
-		{
-			averagexshift/=(ImageList.size()-1);
-			averageyshift/=(ImageList.size()-1);
-		}
-	}
-
-
-
-	Debug("Average x shift is " + Lex(averagexshift));
-	Debug("Average y shift is " + Lex(averageyshift));
-
-	int xc = round(averagexshift)*sgn(currentimage-referenceimage) + miSize/2;
-	int yc = round(averageyshift)*sgn(currentimage-referenceimage) + miSize/2;
-
+	// new changes to preshift mean that the MI peak should generally be at the center now...
 
 	// Create arrays to hold results of each individual trial run
 	int* zeroes = new int[256*256*20*20];
@@ -2418,7 +2418,7 @@ void Registration::MutualInformationFaster(int numberoftrials, float expectedDF,
 		float maxHeight1;
 
 		// Translate linear array index into row and column.
-		PCPCFLib::GetShiftsMIPreConditioned(xShift,yShift,subXShift,subYShift,maxHeight1,mapdata+imagenumber*miSize*miSize,miSize,miSize,options.maxdrift,averagexshift*sgn(currentimage-referenceimage),averageyshift*sgn(currentimage-referenceimage));
+		PCPCFLib::GetShiftsMI(xShift,yShift,subXShift,subYShift,maxHeight1,mapdata+imagenumber*miSize*miSize,miSize,miSize,options.maxdrift);
 
 		xShiftVals[currentimage] =  preshiftx + xShift;
 		yShiftVals[currentimage] = preshifty + yShift;
@@ -2442,41 +2442,51 @@ void Registration::MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries,
 
 	for(int i = 0 ; i < NumberOfImages ; i++)
 	{
-		cl_k_PadCrop.SetArgT(4,padLeft);
-		cl_k_PadCrop.SetArgT(5,padRight);
-		cl_k_PadCrop.SetArgT(6,padTop);
-		cl_k_PadCrop.SetArgT(7,padBottom);
-		cl_k_PadCrop.SetArgT(8,subXShifts[i]);
-		cl_k_PadCrop.SetArgT(9,subYShifts[i]);
-				
-		// Copy correct image into full image..
-		//std::vector<cl_float2> image(fullwidth*fullheight);
-
-		// Now add image to reconstruction - Make WTF - WTFminus			
-		float defocus = defocusshifts[i];
-		/*	
-		for(int j = 0 ; j < fullwidth*fullheight ; j++)
+		if (SelectedSeries[i].second)
 		{
+			cl_k_PadCrop.SetArgT(4, padLeft);
+			cl_k_PadCrop.SetArgT(5, padRight);
+			cl_k_PadCrop.SetArgT(6, padTop);
+			cl_k_PadCrop.SetArgT(7, padBottom);
+			cl_k_PadCrop.SetArgT(8, subXShifts[i]);
+			cl_k_PadCrop.SetArgT(9, subYShifts[i]);
+
+			// Copy correct image into full image..
+			//std::vector<cl_float2> image(fullwidth*fullheight);
+
+			// Now add image to reconstruction - Make WTF - WTFminus			
+			float defocus = defocusshifts[i];
+			/*
+			for(int j = 0 ; j < fullwidth*fullheight ; j++)
+			{
 			image[j].s[0] = rotscaledseries[i*fullwidth*fullheight + j];
 			image[j].s[1] = 0;
+			}
+
+			// Copy full image to GPU and run crop kernel
+			clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&image[0],0,NULL,NULL);
+			*/
+			cl_k_PadCrop.SetArgT(0, fullimages[i]);
+			cl_k_PadCrop.Enqueue(globalWorkSize);
+
+			// Copy image data back to host
+			clEnqueueReadBuffer(clState::clq->cmdQueue, clMem.clImage1, CL_TRUE, 0, width*height*sizeof(cl_float2), &cropimage[0], 0, NULL, NULL);
+
+			// Copy to drift corrected stack
+			for (int k = 0; k < width*height; k++)
+			{
+				driftstack[i*width*height + k] = cropimage[k].s[0];
+			}
+
+			//image.clear();
 		}
-
-		// Copy full image to GPU and run crop kernel
-		clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&image[0],0,NULL,NULL);
-		*/
-		cl_k_PadCrop.SetArgT(0,fullimages[i]);
-		cl_k_PadCrop.Enqueue(globalWorkSize);
-
-		// Copy image data back to host
-		clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.clImage1,CL_TRUE,0,width*height*sizeof(cl_float2),&cropimage[0],0,NULL,NULL);
-		
-		// Copy to drift corrected stack
-		for(int k = 0 ; k < width*height ; k++)
+		else
 		{
-			driftstack[i*width*height + k] = cropimage[k].s[0];
+			for (int k = 0; k < width*height; k++)
+			{
+				driftstack[i*width*height + k] = 0.0f;
+			}
 		}
-
-		//image.clear();
 	}
 
 	cropimage.clear();
@@ -2492,6 +2502,13 @@ void Registration::MakeDriftCorrectedSeries(std::vector<float> &rotscaledseries,
 	drifttags.SetTagAsString("Microscope Info:Voltage",Lex(voltage));
 	drifttags.SetTagAsString("Focal Series:Normalized","True");
 	drifttags.SetTagAsString("Focal Series:No Align","True");
+
+	// Disable images aswell.
+	for (int i = 1; i <= SelectedSeries.size(); i++)
+	{
+		std::string tagpath = "Focal Series::Selected::" + Lex(i - 1);
+		drifttags.SetTagAsBoolean(tagpath.c_str(), SelectedSeries[i - 1].second);
+	}
 
 	// Display drift corrected
 	driftcorrected.GetOrCreateImageDocument().Show();
@@ -2867,30 +2884,38 @@ void Registration::RotationScale(float* seriesdata, size_t* fullWorkSize, std::v
 
 		for(int im = 0; im < NumberOfImages ; im++ )
 		{
-			float expecteddifference = (im-startingimage)*options.focalstep;
-			cl_k_RotScale.SetArgT(6,expecteddifference);
+			if (!SelectedSeries[im].second)
+			{
+				cl_mem null;
+				fullimages.push_back(null);
+			}
+			else
+			{
+				float expecteddifference = (im - startingimage)*options.focalstep;
+				cl_k_RotScale.SetArgT(6, expecteddifference);
 
-			// Copy image into fullimage
-			for(int j = 0; j < fullheight; j++)
-				for(int i = 0; i < fullwidth; i++)
-				{
-					copyImage[i+j*fullwidth] = seriesdata[im*fullwidth*fullheight + i + (j)*fullwidth];
-				}
+				// Copy image into fullimage
+				for (int j = 0; j < fullheight; j++)
+					for (int i = 0; i < fullwidth; i++)
+					{
+						copyImage[i + j*fullwidth] = seriesdata[im*fullwidth*fullheight + i + (j)*fullwidth];
+					}
 
-			clEnqueueWriteBuffer(clState::clq->cmdQueue,clMem.fullImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float),&copyImage[0],0,NULL,NULL);
+				clEnqueueWriteBuffer(clState::clq->cmdQueue, clMem.fullImage, CL_TRUE, 0, fullwidth*fullheight*sizeof(cl_float), &copyImage[0], 0, NULL, NULL);
 
-			fullimages.push_back(clCreateBuffer(clState::context,CL_MEM_READ_WRITE,fullwidth*fullheight*sizeof(cl_float),0,0));
+				fullimages.push_back(clCreateBuffer(clState::context, CL_MEM_READ_WRITE, fullwidth*fullheight*sizeof(cl_float), 0, 0));
 
-			cl_k_RotScale.SetArgT(1,fullimages[im]);
-			cl_k_RotScale.Enqueue(fullWorkSize);
+				cl_k_RotScale.SetArgT(1, fullimages[im]);
+				cl_k_RotScale.Enqueue(fullWorkSize);
 
-			/*clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.rotScaleImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&copyImage[0],0,NULL,NULL);
-			for(int j = 0; j < fullheight;j++)
+				/*clEnqueueReadBuffer(clState::clq->cmdQueue,clMem.rotScaleImage,CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float2),&copyImage[0],0,NULL,NULL);
+				for(int j = 0; j < fullheight;j++)
 				for(int i = 0; i < fullwidth;i++)
 				{
-					rotscaledseries[im*fullwidth*fullheight + i + j*fullwidth] = copyImage[i + (j)*fullwidth].real();
+				rotscaledseries[im*fullwidth*fullheight + i + j*fullwidth] = copyImage[i + (j)*fullwidth].real();
 				}
 				*/
+			}
 		}		
 	} 
 	else
@@ -2898,21 +2923,30 @@ void Registration::RotationScale(float* seriesdata, size_t* fullWorkSize, std::v
 		// Fill new series with old series data.
 		for(int im = 0; im < NumberOfImages ; im++ )
 		{
-			// Copy image into fullimage
-			for(int j = 0; j < fullheight; j++)
-				for(int i = 0; i < fullwidth; i++)
-				{
-					copyImage[i+j*fullwidth] = seriesdata[im*fullwidth*fullheight + i + (j)*fullwidth];
-				}
+			if (!SelectedSeries[im].second)
+			{
+				cl_mem null;
+				fullimages.push_back(null);
+			}
+			else
+			{
+				// Copy image into fullimage
+				for (int j = 0; j < fullheight; j++)
+					for (int i = 0; i < fullwidth; i++)
+					{
+						copyImage[i + j*fullwidth] = seriesdata[im*fullwidth*fullheight + i + (j)*fullwidth];
+					}
 
-				fullimages.push_back(clCreateBuffer(clState::context,CL_MEM_READ_WRITE,fullwidth*fullheight*sizeof(cl_float),0,0));
-				clEnqueueWriteBuffer(clState::clq->cmdQueue,fullimages[im],CL_TRUE,0,fullwidth*fullheight*sizeof(cl_float),&copyImage[0],0,NULL,NULL);
-			
-			/*for(int j = 0; j < fullheight;j++)
+				fullimages.push_back(clCreateBuffer(clState::context, CL_MEM_READ_WRITE, fullwidth*fullheight*sizeof(cl_float), 0, 0));
+				clEnqueueWriteBuffer(clState::clq->cmdQueue, fullimages[im], CL_TRUE, 0, fullwidth*fullheight*sizeof(cl_float), &copyImage[0], 0, NULL, NULL);
+
+				/*for(int j = 0; j < fullheight;j++)
 				for(int i = 0; i < fullwidth;i++)
 				{
-					rotscaledseries[im*fullwidth*fullheight +i + j*fullwidth] = seriesdata[im*fullwidth*fullheight +i + j*fullwidth];
+				rotscaledseries[im*fullwidth*fullheight +i + j*fullwidth] = seriesdata[im*fullwidth*fullheight +i + j*fullwidth];
 				}*/
+			}
+			
 		}
 	}
 
@@ -2923,7 +2957,7 @@ void Registration::IterateImageNumber()
 {
 	currentimage += (gonext*nextdir);
 
-	while(! (currentimage < NumberOfImages && currentimage >=0)) // loop over adjacent images.. i.e    10,11,9,12,8,13,7,14,6etc..
+	while(! (currentimage < NumberOfImages && currentimage >=0 && SelectedSeries[currentimage].second)) // loop over adjacent images.. i.e    10,11,9,12,8,13,7,14,6etc..
 	{
 		gonext++;
 		nextdir *=-1;
@@ -2934,6 +2968,7 @@ void Registration::IterateImageNumber()
 	gonext++;
 	nextdir *=-1;
 
+	Debug("Next image is " + Lex(currentimage));
 }
 
 float Registration::CalculateExpectedDF(int imageone, int imagetwo)

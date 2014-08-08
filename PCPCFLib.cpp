@@ -473,51 +473,6 @@ void PCPCFLib::GetShiftsMI(int &xShift, int &yShift, float &subXShift, float &su
 	PCPCFLib::FindVertexParabolaMI(maxPosition1,sizeX,sizeY, data, subXShift, subYShift, maxheight);
 }
 
-
-void PCPCFLib::GetShiftsMIPreConditioned(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight, 
-						 float* data, int sizeX, int sizeY, float maxshift, float averagexshift, float averageyshift)
-{
-	
-	maxheight = -FLT_MAX;
-	int maxPosition1 = 0;
-
-	// Expected maxposition...
-	int xc = round(averagexshift) + sizeX/2;
-	int yc = round(averageyshift) + sizeY/2;
-
-
-	// Modify to only look for a max with a certain range.
-	for(int j = 0; j< sizeY;j++)
-		for(int i = 0; i< sizeX;i++)
-		{	
-			if(i!=sizeX/2 && j!=sizeY/2)
-			{
-				float val = data[i+j*sizeX];
-
-				if(val > maxheight)
-				{
-					maxheight = val;
-					maxPosition1 = i+j*sizeX;
-				}
-			}
-		}
-
-	// Translate linear array index into row and column.
-	int maxindexr = floor(float((maxPosition1)/(sizeX)))+1;
-	int maxindexc = maxPosition1 + 1 - sizeX*floor(float((maxPosition1)/(sizeX)));
-
-
-	// The zero position is at INDEX width/2 and height/2 i.e 16th element if width is 30...
-
-
-	// Shift is positive or negative depending on image quadrant it appears in.
-	yShift = maxindexr - (1+sizeX/2); // 0 if max is at 31st element of the 60..
-	xShift = maxindexc - (1+sizeY/2);
-				
-
-	// Parabola Vertex Mode
-	PCPCFLib::FindVertexParabolaMI(maxPosition1,sizeX,sizeY, data, subXShift, subYShift, maxheight);
-}
 void PCPCFLib::PrepareImages(float* Data, int width, int height, int numberofimages)
 {
 	// Loop over each image to find the average value and divide through by it.

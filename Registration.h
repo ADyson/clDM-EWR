@@ -96,6 +96,8 @@ private:
 	float scaleMTFy;
 	float voltage;
 
+
+
 	
 
 public:
@@ -104,6 +106,7 @@ public:
 
 	cl_mem ReductionResult;
 	cl_mem ReductionPosition;
+	std::vector<std::pair<int, bool>> SelectedSeries;
 
 
 	bool noalign;

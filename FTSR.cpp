@@ -229,11 +229,12 @@ void EWR::DoWork() {
 	float * subYShifts = new float[numberOfImages];
 	float * defocusshifts = new float[numberOfImages];
 
-	xShiftVals[0] = 0;
-	yShiftVals[0] = 0;
-	subXShifts[0] = 0;
-	subYShifts[0] = 0;
-	defocusshifts[0] = 0; // Doesnt really have one.
+	// Surely this is wrong now it starts from a reference image not always zero :)
+	//xShiftVals[0] = 0;
+	//yShiftVals[0] = 0;
+	//subXShifts[0] = 0;
+	//subYShifts[0] = 0;
+	//defocusshifts[0] = 0; // Doesnt really have one.
 
 	// Setup a fourier transform
 
@@ -265,13 +266,13 @@ void EWR::DoWork() {
 	PCFWrapper.options.enddf = boost::lexical_cast<float>(m_SearchEnd_Text);
 
 	// Reference Image has 0 shifts and focus etc...
-	// If not doing reconstruction PCPCF then the reference should always be 1 (Need to make sure defocus difference is correctly reported aswell - distance from reference or distance from neighbour
 	xShiftVals[PCFWrapper.options.reference] = 0;
 	yShiftVals[PCFWrapper.options.reference] = 0;
 	subXShifts[PCFWrapper.options.reference] = 0;
 	subYShifts[PCFWrapper.options.reference] = 0;
 	defocusshifts[PCFWrapper.options.reference] = 0; // Doesnt really have one.
 
+	// Maybe set them all to zero because none selected images will never get changed...
 
 	if (maxdrift == "") {
 		PCFWrapper.options.maxdrift = 0;
@@ -313,6 +314,29 @@ void EWR::DoWork() {
 		imagetags.SetTagAsString("Focal Series:Normalized", "true");
 	}
 
+
+
+	// Populate list to see if any images have been disabled...
+
+	// Empty list first incase a reconstruction has been done previously...
+	PCFWrapper.SelectedSeries.clear();
+	
+	for (int i = 0; i < numberOfImages; i++)
+	{
+		PCFWrapper.SelectedSeries.push_back(std::make_pair(i, true));
+	}
+
+	for (int i = 1; i <= PCFWrapper.SelectedSeries.size(); i++)
+	{
+		bool t = true;
+		if (imagetags.DoesTagExist("Focal Series::Selected::" + Lex(i - 1)))
+		{
+			imagetags.GetTagAsBoolean("Focal Series::Selected::" + Lex(i - 1), &t);
+			PCFWrapper.SelectedSeries[i - 1].second = t;
+		}
+	}
+
+
 	frontImage.DataChanged();
 
 	// Get contrast limits incase we are goign to do MI...
@@ -342,10 +366,14 @@ void EWR::DoWork() {
 	// Now we have relative shifts of all the images.
 	// Print them to screen
 
+
 	for (int i = 0 ; i < numberOfImages ; i++) {
-		Utility::SetResultWindow("X Shift for image " + Lex(i + 1) + " : " + Lex(subXShifts[i]) + "\n");
-		Utility::SetResultWindow("Y Shift for image " + Lex(i + 1) + " : " + Lex(subYShifts[i]) + "\n");
-		Utility::SetResultWindow("Defocus for image " + Lex(i + 1) + " : " + Lex(defocusshifts[i]) + "\n");
+		if (PCFWrapper.SelectedSeries[i].second)
+		{
+			Utility::SetResultWindow("X Shift for image " + Lex(i + 1) + " : " + Lex(subXShifts[i]) + "\n");
+			Utility::SetResultWindow("Y Shift for image " + Lex(i + 1) + " : " + Lex(subYShifts[i]) + "\n");
+			Utility::SetResultWindow("Defocus for image " + Lex(i + 1) + " : " + Lex(defocusshifts[i]) + "\n");
+		}
 	}
 
 
@@ -355,15 +383,25 @@ void EWR::DoWork() {
 	float * XData = (float *) XLocker.get();
 
 	for (int i = 0 ; i < numberOfImages ; i++) {
-		XData[i] = subXShifts[i];
+		if (PCFWrapper.SelectedSeries[i].second)
+		{
+			XData[i] = subXShifts[i];
+		}
+		else
+			XData[i] = 0;
 	}
 
 	DigitalMicrograph::Image Ygraph = DigitalMicrograph::RealImage("Y Shift", 4, numberOfImages);
 	Gatan::PlugIn::ImageDataLocker YLocker(Ygraph);
 	float * YData = (float *) YLocker.get();
 
-	for (int i = 0 ; i < numberOfImages ; i++) {
-		YData[i] = subYShifts[i];
+	for (int i = 0; i < numberOfImages; i++) {
+		if (PCFWrapper.SelectedSeries[i].second)
+		{
+			YData[i] = subYShifts[i];
+		}
+		else
+			YData[i] = 0;
 	}
 
 	XLocker.~ImageDataLocker();

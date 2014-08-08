@@ -38,10 +38,6 @@ public:
 	static void GetShiftsMI(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight,
 				float* data, int sizeX, int sizeY, float maxshift);
 		
-	static void GetShiftsMIPreConditioned(int &xShift, int &yShift, float &subXShift, float &subYShift,float &maxheight,
-				float* data, int sizeX, int sizeY, float maxshift, float averagexshift, float averageyshift);
-
-
 	static void PrepareImages(float* Data, int width, int height, int numberofimages);
 
 	//void PhaseCompensatedPCF(int numberoftrials, float expectedDF, PCPCFOptions options, cl_mem &clPCPCFResult, cl_mem &clImage1, int sizeX, int sizeY, int imagenumber, std::vector<std::complex<float>> &dataOne, int* xShiftVals, int* yShiftVals, float* subXShifts, float* subYShifts, float* defocusshifts, int preshiftx, int preshifty);

@@ -82,8 +82,9 @@ BOOL SeriesFunctionsDialog::OnInitDialog()
 	// Add columns to the ListCtrl
 	CRect rect;
 	ImageList.GetClientRect(&rect);
-	ImageList.InsertColumn(0, _T("Image Number"), LVCFMT_LEFT, rect.Width()*0.6);
+	ImageList.InsertColumn(0, _T("Image Number"), LVCFMT_LEFT, rect.Width()*0.5);
 	ImageList.InsertColumn(1, _T("Include"), LVCFMT_LEFT, rect.Width()-(rect.Width()*0.6));
+	// Leave a gap because of scrollbar taking some space, dont want a horizontal scroll to appear.
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -165,7 +166,7 @@ void SeriesFunctionsDialog::OnBnClickedGet()
 	if (imagetags.DoesTagExist("Focal Series::Normalized"))
 	{
 		imagetags.GetTagAsString("Focal Series::Normalized", normalized);
-		if (normalized == "True" || "true")
+		if (normalized == "True" || normalized == "true")
 			NormalCheck = TRUE;
 		else
 			NormalCheck = FALSE;
@@ -180,7 +181,7 @@ void SeriesFunctionsDialog::OnBnClickedGet()
 	if (imagetags.DoesTagExist("Focal Series::No Align"))
 	{
 		imagetags.GetTagAsString("Focal Series::No Align", noalign);
-		if (noalign == "True" || "true")
+		if (noalign == "True" || noalign == "true")
 			AlignCheck = TRUE;
 		else
 			AlignCheck = FALSE;
@@ -283,8 +284,11 @@ void SeriesFunctionsDialog::ReadSelectedTags()
 	for (int i = 1; i <= SelectedSeries.size(); i++)
 	{
 		bool t = true;
-		imagetags.GetTagAsBoolean("Focal Series::Selected::" + Lex(i - 1), &t);
-		SelectedSeries[i - 1].second = t;
+		if (imagetags.DoesTagExist("Focal Series::Selected::" + Lex(i - 1)))
+		{
+			imagetags.GetTagAsBoolean("Focal Series::Selected::" + Lex(i - 1), &t);
+			SelectedSeries[i - 1].second = t;
+		}
 	}
 }
 
